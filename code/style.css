@@ -1,3 +1,4 @@
+
 /* Justificar párrafos */
 p {
   text-align: justify;
@@ -20,9 +21,21 @@ p {
     font-size: 18px; /* Set your desired font size */
 }
 
+/* Ajustamos ancho del contenido */
+
+main.content {
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0rem;
+  padding-right: 0rem;
+}
+
+
 
 ---
 
+/* Generamos las boxes de informacion */
 
 .grid.indicadores {
   display: flex;

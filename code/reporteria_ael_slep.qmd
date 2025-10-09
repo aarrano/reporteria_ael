@@ -15,6 +15,7 @@ format:
     self-contained: true
     fig-align: center
     html-table-processing: none
+    page-layout: full
     other-links: 
       - href: https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9
         text: Visor AEL
@@ -211,7 +212,7 @@ En su SLEP actualmente un **", porcentaje, "%** de sus establecimientos no posee
 }
 ```
 
-A continuación se presenta la lista de EE que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera. Para información más actualizada puede acceder al **Visor Anótate en la Lista** en el siguiente enlace $\longrightarrow$ [Visor Anótate en la lista](https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9)")
+A continuación se presenta la lista de EE que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera. Para información más actualizada puede acceder al **Visor Anótate en la Lista** en el siguiente enlace $\longrightarrow$ [Visor Anótate en la lista](https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9)
 
 
 
