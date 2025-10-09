@@ -1,0 +1,110 @@
+/* Justificar párrafos */
+p {
+  text-align: justify;
+}
+
+/* Logo fijo en la esquina superior derecha de toda la página */
+#logo-fixed {
+  position: fixed;
+  top: 1.5vh;          /* separación vertical relativa */
+  left: 1.5vw;         /* separación horizontal relativa */
+  width: 8vw;          /* ancho = 8% del ancho de la ventana */
+  max-width: 160px;    /* límite superior para pantallas grandes */
+  min-width: 80px;     /* límite inferior para pantallas pequeñas */
+  height: auto;        /* mantiene proporción original */
+  z-index: 1000;
+}
+
+/* Adjust font size for all callouts */
+.callout {
+    font-size: 18px; /* Set your desired font size */
+}
+
+
+---
+
+
+.grid.indicadores {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 2vw;                     /* separación relativa al ancho de la ventana */
+  padding: 1vw;
+}
+
+.valuebox {
+  flex: 1 1 28vw;               /* ancho base adaptable */
+  max-width: 340px;
+  min-width: 190px;
+  background-color: #f4f4f4;
+  border-radius: 1.5vw;
+  color: white;
+  text-align: center;
+  padding: 2vw 1vw;
+  box-shadow: 0 0.4vw 1vw rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  /* 🔹 Alineación centrada (horizontal + vertical) */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* centra verticalmente */
+  align-items: center;       /* centra horizontalmente */
+}
+
+.valuebox:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0.6vw 1.5vw rgba(0,0,0,0.25);
+}
+
+/* 🔹 Ícono arriba a la derecha (sin interferir el centrado) */
+.valuebox .icon {
+  position: absolute;
+  top: 0.8vw;
+  right: 1vw;
+  font-size: 2.5vw;
+  opacity: 0.25;
+}
+
+/* 🔹 Valor (número grande) */
+.valuebox .value {
+  font-size: 3vw;
+  font-weight: bold;
+  margin-top: 0.5vw;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* 🔹 Título o caption (centrado bajo el valor) */
+.valuebox .caption {
+  font-size: 1.2vw;
+  margin-top: 0.6vw;
+  opacity: 0.9;
+  text-align: center;
+}
+
+
+.green  { background-color: #2ECC71; }
+.yellow { background-color: #F1C40F; color: #333; }
+.blue   { background-color: #3498DB; }
+.red   { background-color: #ee6b6e; }
+
+@media (max-width: 768px) {
+  .valuebox {
+    flex: 1 1 80vw;
+    font-size: 3.5vw;
+  }
+
+  .valuebox .value {
+    font-size: 6vw;
+  }
+
+  .valuebox .caption {
+    font-size: 3vw;
+  }
+
+  .valuebox .icon {
+    font-size: 5vw;
+  }
+}
