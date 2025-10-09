@@ -59,13 +59,14 @@ message("Debemos generar distintas bases para poder acceder a los distintos indi
 "Esta sección incluye los 5 indicadores mas utilizados: Total de EE, EE atrasados, % de cumplimiento, Prom. dias sin movimiento, EE sin cuentas activas"
 
 fecha_ultima_actualización <- max(df_ael$fecha_corte_info)
+print(paste("Los últimos datos corresponden a",fecha_ultima_actualización))
 
 indicadores_1 <- df_ael %>%
   filter(fecha_corte_info == fecha_ultima_actualización) %>%
   summarize(`Total de EE` = n_distinct(rbd),
             `EE atrasados` = n_distinct(rbd[condicion_rbd == 1]),
             `Tasa de cumplimiento` = round(`EE atrasados`*100/`Total de EE`,1),
-            `Promedio dias atrasados` = round(mean(`promedio dias sin movimiento`[condicion_rbd == 1]),1),
+            `Promedio dias atrasados` = round(mean(`promedio dias sin movimiento`[condicion_rbd == 1 & posibles_cupos>0]),1),
             `Vacantes sin asignar` = sum(posibles_cupos, na.rm = TRUE),
             .by = nombre_slep) %>% 
   left_join(df_cuentas %>%
@@ -77,8 +78,9 @@ indicadores_1 <- df_ael %>%
 # Reemplazamos con 0 los SLEP que no tienen cuentas atrasadas
 indicadores_1[is.na(indicadores_1)] <- 0
 
-# Elementos que pasaremos al QMD ----
-### Listado de EE sin cuenta activa ----
+
+### 2 - Listado de EE sin cuenta activa ----
+"Generamos la base de cuentas inactivas por SLEP, además añadiremos la cantidad de lista de espera de cada RBD"
 
 df_cuentas <- df_cuentas %>% 
   left_join(df_ael %>%
@@ -89,11 +91,14 @@ df_cuentas <- df_cuentas %>%
               mutate(rbd = as.character(rbd))
               , by = "rbd")
 
+"Algunas variables quedan con NA porque no hay correos asociados al RBD en SIGE."
 df_cuentas[is.na(df_cuentas)] <- ""
 
-temp_1 <- df_ael %>%
-  summarize(vas = sum(posibles_cupos,na.rm = TRUE),.by = c(nombre_slep,fecha_corte_info,comuna)) %>% 
-  mutate(comuna2=comuna)
+#### 2.1 Base de cuentas inactivas para el reporte ----
+
+"Seleccionamos variables de interés de la base df_cuentas"
+"Realizamos un cambio en el formato de la fecha, que al importar se lee como string"
+"Pasamos la fecha a formato dia- mes - año"
 
 df_cuentas_slep <- df_cuentas %>% 
   select(nombre_slep,
@@ -108,10 +113,22 @@ df_cuentas_slep <- df_cuentas %>%
     "%d-%m-%Y"
   ))
 
+### 3 - Grafico AEL histórico por comuna ----
+
+"Generamos una base con el histórico de Vacantes sin Asignar, por fecha y comuna"
+temp_1 <- df_ael %>%
+  summarize(vas = sum(posibles_cupos,na.rm = TRUE),.by = c(nombre_slep,fecha_corte_info,comuna)) %>% 
+  mutate(comuna2=comuna)
+
+message("Con los distintos DF puntuales creados, se procede al loop para generar los reportes de cada SLEP")
+
 # LOOP por SLEP ----
 
 for (s in nombre_sleps[10]) {
+  
+  "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
+  
   ## Pasamos los indicadores claves del SLEP ----
   n_ee <- indicadores_1[nombre_sleps == s, 2]
   n_ee_atrasados <-  indicadores_1[nombre_sleps == s, 3]
@@ -122,7 +139,7 @@ for (s in nombre_sleps[10]) {
   nombre = s
   
   ## Pasamos la lista de correos sin AEL ----
-'Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" '
+'Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" una vez filtrada la tabla '
   
   df_cuentas_slep_qmd <- df_cuentas_slep %>% 
     filter(nombre_slep == s) %>% 
@@ -130,13 +147,15 @@ for (s in nombre_sleps[10]) {
   
   df_cuentas_slep_qmd[is.na(df_cuentas_slep_qmd)] <- ""
   
-  ## Pasamos el trend line por comuna del SLEP
+  ## Pasamos el trend line por comuna del SLEP ----
+  "Filtramos la base con los datos longitudinales por comuna"
   temp_2 <- temp_1 %>% 
     filter(nombre_slep == s)
 
+  ## Quarto render ----
   
   quarto::quarto_render(
-    input = "./code/reporte/reporteria_ael_slep.qmd",
+    input = "./code/reporteria_ael_slep.qmd",
     execute_dir = getwd(), 
     output_format = "html",
     output_file = paste0("reporte_", gsub(" ", "_", s), ".html"),
@@ -154,8 +173,10 @@ for (s in nombre_sleps[10]) {
       glosario = tabla_glosario
     ),
     quiet = FALSE,
-    quarto_args = c("--output-dir", "../../Minuta x SLEP"),
+    quarto_args = c("--output-dir", "../Minuta x SLEP"),
   )
+
+#Fin del loop
 }
 
 
