@@ -28,7 +28,7 @@ link_maestro <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2
 link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/output/Cuentas Activas/cuentas_activas.xlsx"
 
 #Cargamos tabla con definiciones para el glosario
-tabla_glosario <- read.xlsx("./code/reporte/tabla_glosario.xlsx")
+tabla_glosario <- read.xlsx("./inputs_qmd/tabla_glosario.xlsx")
 
 
 # Carga de información ----
@@ -122,7 +122,7 @@ for (s in nombre_sleps[10]) {
   nombre = s
   
   ## Pasamos la lista de correos sin AEL ----
-"Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" "
+'Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" '
   
   df_cuentas_slep_qmd <- df_cuentas_slep %>% 
     filter(nombre_slep == s) %>% 
