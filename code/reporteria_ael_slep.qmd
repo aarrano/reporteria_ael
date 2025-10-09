@@ -15,6 +15,14 @@ format:
     self-contained: true
     fig-align: center
     html-table-processing: none
+    other-links: 
+      - href: https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9
+        text: Visor AEL
+        icon: speedometer
+        
+      - href: https://educacionpublica.gob.cl/wp-content/uploads/2025/04/Orientaciones-Claves-SAE-y-NEP.pdf
+        text: Doc. Orientaciones SAE
+        icon: file-earmark
 toc: true
 toc-depth: 2
 number-sections: true
