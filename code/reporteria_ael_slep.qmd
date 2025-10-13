@@ -67,7 +67,7 @@ Este reporte busca entregar información respecto del proceso de regularización
 
 En este documento podrá encontrar información resumida y agregada a nivel de establecimiento, gráficos con el comportamiento en el tiempo de las **vacantes sin asignar**,tablas con el listado de establecimientos que no poseen cuentas activas para la gestión del AEL, listados de los establecimientos que deberían ser priorizados para mejorar la gestión y eficiencia del proceso **Anótate en la lista** debido a altas listas de espera o una gran cantidad de días sin gestión de vacantes sin asignar.
 
-La información disponible en este documento se basa únicamente en los establecimientos participantes del SAE, incluyendo los niveles desde Prekínder hasta 4° medio, excluyendo las modalidades de educación especial, artística y EPJA.
+La información disponible en este documento se basa únicamente en los establecimientos participantes del SAE, incluyendo los niveles desde Prekínder hasta 4° medio, excluyendo las modalidades de educación especial, artística , EPJA, Salas Cunas y Jardines Infantiles.
 
 ::: callout-tip
 ## Importante
@@ -95,10 +95,13 @@ glosario %>%
     table.width = pct(100),
     table.font.size = 14
   ) %>%
-  tab_style(
+  tab_style( #Negrita primera fila
     style = cell_text(weight = "bold", color = "#0F69B4"),
     locations = cells_column_labels(everything())
   ) %>%
+  tab_style( #Negrita para primera columna
+    style = cell_text(weight = "bold",  color = "#0F69B4"),
+    locations = cells_body(columns = 1)) %>% 
   cols_align(align = "left", columns = c(1, 2)) %>% 
   cols_width(Variable ~ px(70),
              Definición ~ px(180)) %>% 
@@ -125,64 +128,44 @@ $$
   \end{cases}
 $$
 
-1.  En el primer escenario, las vacantes sin asignar corresponden al total de estudiantes en Listas de espera, que es menor a la cantidad de vacantes disponibles. En el Establecimiento aún quedarían 5 vacantes disponibles.
+1.  En el **primer escenario**, las vacantes sin asignar corresponden al total de estudiantes en Listas de espera, que es menor a la cantidad de vacantes disponibles. En el Establecimiento aún quedarían 5 vacantes disponibles.
 
-2.  En el segundo escenario, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incoporar más estudiantes que la oferta disponible.
+2.  En el **segundo escenario**, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incoporar más estudiantes que la oferta disponible.
 
 # Estado del territorio
 
 ::::::::::::::::::: {.grid .indicadores}
 :::::: {.valuebox .green}
-::: icon
-<i class="fa-solid fa-school"></i>
-:::
-
 ::: caption
-Establecimientos
+Establecimientos en SAE
 :::
-
 ::: value
 `r params$n_ee`
 :::
 ::::::
 
 :::::: {.valuebox .yellow}
-::: icon
-<i class="fa-solid fa-school"></i>
-:::
-
 ::: caption
 Establecimientos atrasados
 :::
-
 ::: value
 `r params$n_ee_atrasados`
 :::
 ::::::
 
 :::::: {.valuebox .blue}
-::: icon
-<i class="fa-regular fa-clock"></i>
-:::
-
 ::: caption
 Vacantes sin asignar
 :::
-
 ::: value
 `r params$vas`
 :::
 ::::::
 
 :::::: {.valuebox .red}
-::: icon
-<i class="fa-regular fa-clock"></i>
-:::
-
 ::: caption
-EE sin cuenta activa
+Establecimientos sin cuenta activa
 :::
-
 ::: value
 `r params$n_ee_sin_cuenta`
 :::
@@ -191,7 +174,7 @@ EE sin cuenta activa
 
 ## Establecimientos sin cuentas activas
 
-Para una correcta gestión del **Anótate en la lista** es necesario que todos los establecimientos del SLEP `r params$nombre` cumplan con mantener la información de contacto de Directores/as y Encargadas/os SAE actualizada en **SIGE**. 
+Para una correcta gestión del **Anótate en la lista** es necesario que todos los establecimientos del SLEP `r params$nombre` cumplan con mantener la información de contacto de Directores/as y Encargadas/os SAE actualizada en **SIGE**.
 
 La información de contacto es utilizada por el Mineduc para la creación de los usuarios, a través del envío de un mail automático a ambos actores, por lo que si esta información se encuentra desactualizada no es posible la creación de la cuenta, y en consecuencia, no es posible gestionar las listas de espera, afectando el derecho a la educación de los postulantes.
 
@@ -213,8 +196,6 @@ En su SLEP actualmente un **", porcentaje, "%** de sus establecimientos no posee
 ```
 
 A continuación se presenta la lista de EE que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera. Para información más actualizada puede acceder al **Visor Anótate en la Lista** en el siguiente enlace $\longrightarrow$ [Visor Anótate en la lista](https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9)
-
-
 
 ```{r cuentas_slep}
 #| echo: false
@@ -314,12 +295,14 @@ datos_fig_1 %>%
 
 ### Comportamiento Histórico
 
-En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de Enero a Octubre 2025 para cada comuna del territorio.
+En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de Enero a Octubre 2025 para cada comuna del territorio, los datos se obtuvieron semanal actualizando el visor todos los lunes del año.
 
 ::: callout-warning
 # Antecedentes de fiscalización
 
-Durante la última semana de marzo la **Superintendencia de Educación** compartió a través de la REX XX, las instrucciones y consecuencias de la faltas de gestión de las listas de espera.
+La **Superintendencia de Educación** compartió a través del oficio N 492 del **26 de marzo de 2025**, las instrucciones y consecuencias de la faltas de gestión de las listas de espera. Lo hizo anteriormente en el oficio N 164 el 27 de enero de 2025.
+
+El oficio puede revisarse en el siguiente enlace $\longrightarrow$ [link](https://www.supereduc.cl/wp-content/uploads/2024/03/ORD-No-0492-INFORMA-SOBRE-PROCEDIMIENTO-REGULACION-DEL-SAE-A_SOSTENEDORES-Y-DIREC.-DE-ESTABLECIMIENTOS-EDUC.-1.pdf)
 :::
 
 ```{r}
@@ -350,9 +333,12 @@ temp_2 %>%
     plot.title = element_text(size = 14),
     panel.grid = element_blank()
   ) +
-  ggtitle("Vacantes sin asignar durante el 2025, por comuna y mes.") +
-  xlab(NULL) +
-  ylab("Vacantes sin Asignar (VAS)")+
+labs(
+    title = "Vacantes sin asignar durante el 2025, por comuna y día",
+    subtitle = "Datos semanales",
+    x = NULL,
+    y = "Vacantes sin Asignar (VAS)"
+  ) +
 facet_wrap( ~ comuna, ncol = 2) 
 
 ```
@@ -387,7 +373,13 @@ temp_3 <- temp_3 %>%
 
 # glimpse(temp_3)
 
-temp_3 %>%
+temp3 <- temp_3 %>%
+  adorn_totals(where = "row", fill = "Total")
+
+n_filas <- nrow(temp3)
+
+
+temp3 %>%
   gt() %>%
   opt_align_table_header(align = "left") %>%
   tab_options(
@@ -400,14 +392,20 @@ temp_3 %>%
     locations = cells_column_labels(everything())
   ) %>%
   tab_style(style = cell_text(v_align = "middle"),
-                locations = cells_column_labels()) %>%
+            locations = cells_column_labels()) %>%
+  tab_style(
+    #Negrita para primera columna
+    style = cell_text(weight = "bold", color = "#0F69B4"),
+    locations = cells_body(columns = 1)
+    ) %>%
+  tab_style(style = cell_text(weight = "bold", color = "#0F69B4"),
+             locations = cells_body(rows = n_filas)
+    ) %>% 
   cols_align(align = "center", columns = c(2, 3, 4)) %>%
   tab_footnote(footnote = "Fuente: Visor Anótate en la lista, 2025.") %>%
-      cols_width(
-      colnames(temp_3)[2] ~ px(90),
-      colnames(temp_3)[3] ~ px(90),
-      colnames(temp_3)[4] ~ px(80)
-    )
+  cols_width(colnames(temp_3)[2] ~ px(90),
+             colnames(temp_3)[3] ~ px(90),
+             colnames(temp_3)[4] ~ px(80))
 
   
 ```
