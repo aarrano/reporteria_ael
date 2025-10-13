@@ -46,7 +46,7 @@ main.content {
 }
 
 .valuebox {
-  flex: 1 1 28vw;               /* ancho base adaptable */
+  flex: 1 1 28vw;
   max-width: 340px;
   min-width: 190px;
   background-color: #f4f4f4;
@@ -55,15 +55,13 @@ main.content {
   text-align: center;
   padding: 2vw 1vw;
   box-shadow: 0 0.4vw 1vw rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  /* 🔹 Alineación centrada (horizontal + vertical) */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;   /* centra verticalmente */
-  align-items: center;       /* centra horizontalmente */
 }
 
 .valuebox:hover {
@@ -71,42 +69,47 @@ main.content {
   box-shadow: 0 0.6vw 1.5vw rgba(0,0,0,0.25);
 }
 
-/* 🔹 Ícono arriba a la derecha (sin interferir el centrado) */
-.valuebox .icon {
-  position: absolute;
-  top: 0.8vw;
-  right: 1vw;
-  font-size: 2.5vw;
-  opacity: 0.25;
-}
-
-/* 🔹 Valor (número grande) */
+/* 🔹 Valor (número) */
 .valuebox .value {
   font-size: 3vw;
   font-weight: bold;
   margin-top: 0.5vw;
   line-height: 1.1;
   text-align: center;
+  width: 100%;
 }
 
-/* 🔹 Título o caption (centrado bajo el valor) */
+/* 🔹 Caption (texto) — centrado verdadero */
 .valuebox .caption {
   font-size: 1.2vw;
   margin-top: 0.6vw;
   opacity: 0.9;
-  text-align: center;
+  display: flex;
+  justify-content: center;   /* centra horizontalmente */
+  align-items: center;       /* centra verticalmente si hay varias líneas */
+  text-align: center;        /* centra las líneas del texto */
+  flex-wrap: wrap;
+  max-width: 90%;            /* evita pegarse a los bordes */
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.2;
 }
 
+/* 🔹 Evita herencias conflictivas */
+.valuebox > div {
+  width: auto !important;
+  text-align: center !important;
+}
 
+/* 🔹 Colores */
 .green  { background-color: #2ECC71; }
 .yellow { background-color: #F1C40F; color: #333; }
 .blue   { background-color: #3498DB; }
-.red   { background-color: #ee6b6e; }
+.red    { background-color: #ee6b6e; }
 
 @media (max-width: 768px) {
   .valuebox {
     flex: 1 1 80vw;
-    font-size: 3.5vw;
   }
 
   .valuebox .value {
@@ -115,9 +118,5 @@ main.content {
 
   .valuebox .caption {
     font-size: 3vw;
-  }
-
-  .valuebox .icon {
-    font-size: 5vw;
   }
 }
