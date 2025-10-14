@@ -16,6 +16,19 @@ p {
   z-index: 1000;
 }
 
+--- 
+
+
+/* Para tablas interactivas específicamente */
+.gt_table .gt_col_heading {
+  color: #0F69B4 !important;
+  vertical-align: middle !important;
+}
+
+
+---
+
+
 /* Adjust font size for all callouts */
 .callout {
     font-size: 18px; /* Set your desired font size */
