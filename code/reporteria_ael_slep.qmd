@@ -1,5 +1,5 @@
 ---
-title: "Reporte proceso Anótate en la Lista (AEL) 2025"
+title: "BORRADOR: Reporte proceso Anótate en la Lista (AEL) 2025"
 subtitle: "SLEP `r params$slep`"
 lang: es
 language:
@@ -43,6 +43,7 @@ params:
   vas: null
   data_fig_1: null
   graf_lineas: null
+  ael_actual: null
 output-dir: ../../Minuta x SLEP 
 ---
 
@@ -58,6 +59,10 @@ pacman::p_load(tidyverse,data.table,openxlsx,janitor,gt,fontawesome,ggrepel)
 library(dplyr)
 library(tidyr)
 ```
+
+#Disclaimer
+
+El presente documento se encuentra en etapa borrador, esperando a ser validado y retroalimentado por los SLEP y las jefaturas de la División de Desarrollo Educativo. Por lo anterior, es que este reporte no puede ser compartido de forma oficial. 
 
 # Presentación
 
@@ -111,7 +116,7 @@ glosario %>%
 
 ## Cálculo de vacantes sin asignar
 
-Las vacantes sin asignar corresponden al indicador utilizado por la DEP para monitorear la cantidad de estudiantes que pueden matrícularse en un establecimiento en un período determinado del tiempo. Este indicador permite la agregación por establecimiento, nivel, comuna y SLEP, además de ser de fácil monitoreo y comunicación.
+Las vacantes sin asignar corresponden al indicador utilizado por la DEP para monitorear la cantidad de estudiantes que pueden matricularse en un establecimiento en un período determinado del tiempo. Este indicador permite la agregación por establecimiento, nivel, comuna y SLEP, además de ser de fácil monitoreo y comunicación.
 
 A continuación se presenta el cálculo de las **Vacantes Sin Asignar** (VAS) y un ejemplo concreto.
 
@@ -176,7 +181,7 @@ Establecimientos sin cuenta activa
 
 Para una correcta gestión del **Anótate en la lista** es necesario que todos los establecimientos del SLEP `r params$nombre` cumplan con mantener la información de contacto de Directores/as y Encargadas/os SAE actualizada en **SIGE**.
 
-La información de contacto es utilizada por el Mineduc para la creación de los usuarios, a través del envío de un mail automático a ambos actores, por lo que si esta información se encuentra desactualizada no es posible la creación de la cuenta, y en consecuencia, no es posible gestionar las listas de espera, afectando el derecho a la educación de los postulantes.
+La información de contacto es utilizada por el Mineduc para la creación de los usuarios, a través del envío de un mail automático a ambos actores, por lo que **si esta información se encuentra desactualizada en SIGE no es posible la creación de la cuenta**, y en consecuencia, no es posible gestionar las listas de espera, afectando el derecho a la educación de los postulantes.
 
 ```{r}
 #| echo: false
@@ -195,7 +200,16 @@ En su SLEP actualmente un **", porcentaje, "%** de sus establecimientos no posee
 }
 ```
 
-A continuación se presenta la lista de EE que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera. Para información más actualizada puede acceder al **Visor Anótate en la Lista** en el siguiente enlace $\longrightarrow$ [Visor Anótate en la lista](https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9)
+A continuación se presenta la lista de establecimientos que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera. 
+
+1. Mail Director/Encargado SAE: Mail registrado en SIGE al cual se envió el enlace para la creación de usuario:
+2. Fecha envio correo Director/Encargado SAE: Fecha en que se envió el correo por parte de Mineduc para la creación de la cuenta.
+
+**Nota 1:** Si la información de correo aparece en blanco, es porque en SIGE no hay un correo registrado para ese cargo.
+**Nota 2:** Es posible que el correo enviado por Mineduc se aloje en la carpeta SPAM.
+
+
+Para información más actualizada puede acceder al **Visor Anótate en la Lista** en el siguiente enlace $\longrightarrow$ [Visor Anótate en la lista](https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9)
 
 ```{r cuentas_slep}
 #| echo: false
@@ -259,7 +273,7 @@ Actualmente, todos los establecimientos del SLEP cuentan con al menos un usuario
 En su SLEP actualmente hay un total de **`r params$n_ee_atrasados` establecimientos atrasados**, los que representan un total de **`r params$vas` vacantes sin asignar**.
 :::
 
-En la siguiente Figura se aprecia la distribución de los **26 SLEP** en régimen al 2025, donde el círculo de color diferente es la ubicación de su SLEP según la cantidad total de establecimientos (EE) y las vacantes sin asignar (VAS)
+En la siguiente Figura se aprecia la distribución de los **26 SLEP** en régimen al 2025, donde el círculo de color diferente es la ubicación de su SLEP según la cantidad total de establecimientos (eje horizontal) y las vacantes sin asignar (VAS, eje vertical)
 
 ```{r fig_scatter}
 #| echo: false
@@ -412,4 +426,63 @@ temp3 %>%
 
 ### Listado de gestión.
 
-En esta sección se presenta el listado de establecimientos más crítico en la asignación de vacantes disponibles.
+En esta sección se presenta el listado de establecimientos según criticidad, ordenados por la cantidad de vacantes sin asignar.
+```{r listado_rbds_gestion}
+#| echo: false
+#| message: false
+#| warning: false
+
+listado_ael_rbd <- params$ael_actual
+listado_ael_rbd = as.data.frame(listado_ael_rbd)
+
+if ( nrow(listado_ael_rbd) == 0){
+  
+  knitr::asis_output(paste0("
+::: {.callout-tip title: \" ✅Establecimientos sin vacantes pendientes de asignar\"} 
+Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pendientes.
+:::"
+))
+} else{
+  
+  colnames(listado_ael_rbd) <- c( "Comuna", "RBD", "Establecimiento", "Vacantes sin Asignar", "Niveles Atrasados", "Niveles Ofrecidos", "Promedio días sin movimiento en AEL" )
+  
+listado_ael_rbd %>%
+    gt() %>%
+    opt_interactive(
+      use_filters = TRUE,
+      use_resizers = TRUE,
+      use_highlight = TRUE,
+      use_compact_mode = TRUE,
+      use_text_wrapping = FALSE,
+      use_page_size_select = TRUE
+    ) %>% 
+    tab_header(
+      title = md("**Estado actual del AEL por Establecimiento**"),
+      subtitle = "Ordenado según Vacantes sin asignar"
+    ) %>%
+    opt_align_table_header(align = "left") %>%
+    tab_options(
+      heading.padding = px(1),
+      column_labels.padding = px(5),
+      table.width = pct(100),
+      table.font.size = 14,
+      ihtml.use_text_wrapping = TRUE,
+      column_labels.font.weight = "bold"
+    ) %>%
+    cols_width(
+      colnames(listado_ael_rbd)[1] ~ px(100),
+      colnames(listado_ael_rbd)[2] ~ px(60),
+      colnames(listado_ael_rbd)[4] ~ px(80),
+      colnames(listado_ael_rbd)[5] ~ px(80),
+      colnames(listado_ael_rbd)[6] ~ px(80),
+      colnames(listado_ael_rbd)[7] ~ px(110)
+    ) %>%
+    cols_align(align = "center", columns = c(2, 4, 5, 6, 7)) %>% 
+    tab_style(
+      style = cell_text(color = "#0F69B4", weight = "bold", v_align = "middle"),
+      locations = cells_column_labels(columns = everything())
+    ) %>%
+    tab_footnote(footnote = "La información actualizada se encuentra en el visor compartido")
+  }
+```
+

@@ -24,6 +24,14 @@ year_actual <- year(today())
 #Acceso al maestro del AEL
 link_maestro <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/output/df_maestro_ael_2025.csv"
 
+#Acceso al ultimo AEL
+link_1 <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/output/datos visualizador 24_10_28/"
+files <- list.files(link_1,full.names = TRUE)
+
+ael_t <- fread(files[length(files)-1])
+
+message(paste("Leyendo el archivo",files[length(files)-1],"como archivo actual"))
+
 #Acceso al estado de cuentas 
 link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/output/Cuentas Activas/cuentas_activas.xlsx"
 
@@ -122,6 +130,15 @@ temp_1 <- df_ael %>%
 
 message("Con los distintos DF puntuales creados, se procede al loop para generar los reportes de cada SLEP")
 
+### 4 - Listado AEL actual por establecimiento 
+
+temp_ael <- ael_t %>% 
+  filter(condicion_rbd==1) %>% 
+  filter(id == 1) %>% 
+  arrange(id_orden_rbd) %>% 
+  select(nombre_slep,comuna,rbd,nombre_ee,`total posibles cupos`,`total niveles atrasados`,`total niveles ofrecidos`,`promedio dias sin movimiento`) %>% 
+  rename(`Vacantes sin asignar` = `total posibles cupos`)
+
 # LOOP por SLEP ----
 
 for (s in nombre_sleps[10]) {
@@ -151,6 +168,11 @@ for (s in nombre_sleps[10]) {
   "Filtramos la base con los datos longitudinales por comuna"
   temp_2 <- temp_1 %>% 
     filter(nombre_slep == s)
+  
+  ## Pasamos el estado AEL de cada RBD ----
+  ael_actual <- temp_ael %>% 
+    filter(nombre_slep == s) %>% 
+    select(-nombre_slep)
 
   ## Quarto render ----
   
@@ -170,7 +192,8 @@ for (s in nombre_sleps[10]) {
       data_fig_1 = indicadores_1,
       graf_lineas = temp_2,
       vas = vas,
-      glosario = tabla_glosario
+      glosario = tabla_glosario,
+      ael_actual = ael_actual
     ),
     quiet = FALSE,
     quarto_args = c("--output-dir", "../Minuta x SLEP"),
