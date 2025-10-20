@@ -141,7 +141,7 @@ temp_ael <- ael_t %>%
 
 # LOOP por SLEP ----
 
-for (s in nombre_sleps[10]) {
+for (s in nombre_sleps[11]) {
   
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))

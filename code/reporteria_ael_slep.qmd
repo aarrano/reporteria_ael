@@ -8,7 +8,7 @@ language:
 author:
   - name: "Alonso Arraño"
     affiliation: "Subdepto. de Instalación y Gestión Educativa"
-date: "2025-10-07"
+date: "2025-10-20"
 format: 
   html:
     css: style.css
@@ -60,9 +60,9 @@ library(dplyr)
 library(tidyr)
 ```
 
-#Disclaimer
+# Disclaimer
 
-El presente documento se encuentra en etapa borrador, esperando a ser validado y retroalimentado por los SLEP y las jefaturas de la División de Desarrollo Educativo. Por lo anterior, es que este reporte no puede ser compartido de forma oficial. 
+El presente documento se encuentra en etapa borrador, esperando a ser validado y retroalimentado por los SLEP y las jefaturas de la División de Desarrollo Educativo. Por lo anterior, es que este reporte no puede ser compartido de forma oficial.
 
 # Presentación
 
@@ -139,43 +139,47 @@ $$
 
 # Estado del territorio
 
-::::::::::::::::::: {.grid .indicadores}
-:::::: {.valuebox .green}
+::::::::::::::: {.grid .indicadores}
+::::: {.valuebox .green}
 ::: caption
 Establecimientos en SAE
 :::
+
 ::: value
 `r params$n_ee`
 :::
-::::::
+:::::
 
-:::::: {.valuebox .yellow}
+::::: {.valuebox .yellow}
 ::: caption
 Establecimientos atrasados
 :::
+
 ::: value
 `r params$n_ee_atrasados`
 :::
-::::::
+:::::
 
-:::::: {.valuebox .blue}
+::::: {.valuebox .blue}
 ::: caption
 Vacantes sin asignar
 :::
+
 ::: value
 `r params$vas`
 :::
-::::::
+:::::
 
-:::::: {.valuebox .red}
+::::: {.valuebox .red}
 ::: caption
 Establecimientos sin cuenta activa
 :::
+
 ::: value
 `r params$n_ee_sin_cuenta`
 :::
-::::::
-:::::::::::::::::::
+:::::
+:::::::::::::::
 
 ## Establecimientos sin cuentas activas
 
@@ -200,14 +204,12 @@ En su SLEP actualmente un **", porcentaje, "%** de sus establecimientos no posee
 }
 ```
 
-A continuación se presenta la lista de establecimientos que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera. 
+A continuación se presenta la lista de establecimientos que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera.
 
-1. Mail Director/Encargado SAE: Mail registrado en SIGE al cual se envió el enlace para la creación de usuario:
-2. Fecha envio correo Director/Encargado SAE: Fecha en que se envió el correo por parte de Mineduc para la creación de la cuenta.
+1.  Mail Director/Encargado SAE: Mail registrado en SIGE al cual se envió el enlace para la creación de usuario:
+2.  Fecha envio correo Director/Encargado SAE: Fecha en que se envió el correo por parte de Mineduc para la creación de la cuenta.
 
-**Nota 1:** Si la información de correo aparece en blanco, es porque en SIGE no hay un correo registrado para ese cargo.
-**Nota 2:** Es posible que el correo enviado por Mineduc se aloje en la carpeta SPAM.
-
+**Nota 1:** Si la información de correo aparece en blanco, es porque en SIGE no hay un correo registrado para ese cargo. **Nota 2:** Es posible que el correo enviado por Mineduc se aloje en la carpeta SPAM.
 
 Para información más actualizada puede acceder al **Visor Anótate en la Lista** en el siguiente enlace $\longrightarrow$ [Visor Anótate en la lista](https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9)
 
@@ -427,6 +429,7 @@ temp3 %>%
 ### Listado de gestión.
 
 En esta sección se presenta el listado de establecimientos según criticidad, ordenados por la cantidad de vacantes sin asignar.
+
 ```{r listado_rbds_gestion}
 #| echo: false
 #| message: false
@@ -485,4 +488,3 @@ listado_ael_rbd %>%
     tab_footnote(footnote = "La información actualizada se encuentra en el visor compartido")
   }
 ```
-
