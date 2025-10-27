@@ -68,7 +68,7 @@ El presente documento se encuentra en etapa borrador, esperando a ser validado y
 
 Estimadas Subdirecciones y Encargados SAE:
 
-Este reporte busca entregar información respecto del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**, el que se encuentra asociado al **Sistema de Admisión Escolar (SAE)** y que funciona de forma pararela a los procesos de admisión principal y complementarios. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de las matrículas 2026. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, es que la gestión de las vacantes disponibles, permiten proteger las trayectorias educativas de los estudiantes.
+Este reporte busca entregar información respecto del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**, el que se encuentra asociado al **Sistema de Admisión Escolar (SAE)** y que funciona de forma paralela a los procesos de admisión principal y complementarios. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de las matrículas 2026. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, es que la gestión de las vacantes disponibles, permiten proteger las trayectorias educativas de los estudiantes.
 
 En este documento podrá encontrar información resumida y agregada a nivel de establecimiento, gráficos con el comportamiento en el tiempo de las **vacantes sin asignar**,tablas con el listado de establecimientos que no poseen cuentas activas para la gestión del AEL, listados de los establecimientos que deberían ser priorizados para mejorar la gestión y eficiencia del proceso **Anótate en la lista** debido a altas listas de espera o una gran cantidad de días sin gestión de vacantes sin asignar.
 
@@ -206,8 +206,8 @@ En su SLEP actualmente un **", porcentaje, "%** de sus establecimientos no posee
 
 A continuación se presenta la lista de establecimientos que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera.
 
-1.  Mail Director/Encargado SAE: Mail registrado en SIGE al cual se envió el enlace para la creación de usuario:
-2.  Fecha envio correo Director/Encargado SAE: Fecha en que se envió el correo por parte de Mineduc para la creación de la cuenta.
+1.  **Mail Director/Encargado SAE**: Mail registrado en SIGE al cual se envió el enlace para la creación de usuario:
+2.  **Fecha envío correo Director/Encargado SAE**: Fecha en que se envió el correo por parte de Mineduc para la creación de la cuenta.
 
 **Nota 1:** Si la información de correo aparece en blanco, es porque en SIGE no hay un correo registrado para ese cargo. **Nota 2:** Es posible que el correo enviado por Mineduc se aloje en la carpeta SPAM.
 
@@ -217,17 +217,17 @@ Para información más actualizada puede acceder al **Visor Anótate en la Lista
 #| echo: false
 #| message: false
 #| warning: false
+#| results: "asis"
 
 listado_cuentas_table <- params$listado_cuentas
 listado_cuentas_table = as.data.frame(listado_cuentas_table)
 
 if ( nrow(listado_cuentas_table) == 0){
-  
-  knitr::asis_output(paste0("
-::: {.callout-tip title: \" ✅Establecimientos con cuentas\"} 
+  cat("
+::: {.callout-tip title='✅ Establecimientos con cuentas'}
 Actualmente, todos los establecimientos del SLEP cuentan con al menos un usuario activo en el sistema.
-:::"
-))
+:::
+")  
 } else{
   
   colnames(listado_cuentas_table) <- c( "Establecimiento", "Lista de espera", "Mail Director", "Mail encargado SAE", "Fecha envio correo Director", "Fecha envio correo SAE" )

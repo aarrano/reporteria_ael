@@ -141,7 +141,7 @@ temp_ael <- ael_t %>%
 
 # LOOP por SLEP ----
 
-for (s in nombre_sleps[11]) {
+for (s in nombre_sleps[25]) {
   
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
@@ -195,8 +195,8 @@ for (s in nombre_sleps[11]) {
       glosario = tabla_glosario,
       ael_actual = ael_actual
     ),
-    quiet = FALSE,
-    quarto_args = c("--output-dir", "../Minuta x SLEP"),
+    quiet = TRUE,
+    quarto_args = c("--output-dir", "../Minuta x SLEP./251027/"),
   )
 
 #Fin del loop
