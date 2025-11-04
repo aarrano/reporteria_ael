@@ -140,8 +140,9 @@ temp_ael <- ael_t %>%
   rename(`Vacantes sin asignar` = `total posibles cupos`)
 
 # LOOP por SLEP ----
+pilotaje = c(6,7,10,11,15,22,24)
 
-for (s in nombre_sleps[25]) {
+for (s in nombre_sleps[6]) {
   
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
@@ -198,6 +199,8 @@ for (s in nombre_sleps[25]) {
     quiet = TRUE,
     quarto_args = c("--output-dir", "../Minuta x SLEP./251027/"),
   )
+  
+message("Reporte creado")
 
 #Fin del loop
 }

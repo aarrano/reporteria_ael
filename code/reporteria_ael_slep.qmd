@@ -8,7 +8,8 @@ language:
 author:
   - name: "Alonso Arraño"
     affiliation: "Subdepto. de Instalación y Gestión Educativa"
-date: "2025-10-20"
+date: today
+date-format: "DD-MM-YYYY"
 format: 
   html:
     css: style.css
