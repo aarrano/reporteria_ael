@@ -276,21 +276,23 @@ Actualmente, todos los establecimientos del SLEP cuentan con al menos un usuario
 En su SLEP actualmente hay un total de **`r params$n_ee_atrasados` establecimientos atrasados**, los que representan un total de **`r params$vas` vacantes sin asignar**.
 :::
 
-En la siguiente Figura se aprecia la distribución de los **26 SLEP** en régimen al 2025, donde el círculo de color diferente es la ubicación de su SLEP según la cantidad total de establecimientos (eje horizontal) y las vacantes sin asignar (VAS, eje vertical)
+En la siguiente Figura se aprecia la distribución de los **26 SLEP** en régimen al 2025, donde el círculo de color diferente es la ubicación de su SLEP según la **tasa de cumplimiento** (eje horizontal) y las vacantes sin asignar (VAS, eje vertical)
 
 ```{r fig_scatter}
 #| echo: false
 #| message: false
 #| warning: false
+#| fig-align: center
 
 datos_fig_1 <- params$data_fig_1
 datos_fig_1 = as.data.frame(datos_fig_1)
+max_fig_1 = ceiling(max(datos_fig_1$Vacantes.sin.asignar) / 50) * 50
 
 #print(datos_fig_1)
 
 datos_fig_1 %>%
     mutate(nombre_slep = if_else(nombre_slep == params$slep, nombre_slep, "")) %>%
-    ggplot(aes(x = Total.de.EE, y = Vacantes.sin.asignar , fill = nombre_slep))+
+    ggplot(aes(x = Tasa.de.cumplimiento, y = Vacantes.sin.asignar , fill = nombre_slep))+
     geom_point(aes(color= nombre_slep, fill= nombre_slep),
                size = 4, alpha = 0.5,
                shape = 21,
@@ -306,11 +308,83 @@ datos_fig_1 %>%
       max.overlaps = 1000,
       seed = 7654 # For reproducibility reasons
     )+
-  labs(x = "Total de Establecimientos", y = "Total Vacantes sin asignar", title = "Distribución de los SLEP según total de EE y VAS")
+  scale_x_continuous(n.breaks = 6)+
+  scale_y_continuous(limits = c(0, max_fig_1), 
+                     breaks = seq(0, max_fig_1, length.out = 6),
+                     expand = c(0.03,0.04 ))+
+  labs(x = "Tasa de cumplimiento(%)", y = "Total Vacantes sin asignar", title = "Distribución de los SLEP según % de cumplimiento y VAS")
 
 ```
 
-### Comportamiento Histórico
+## Distribución de los establecimientos atrasados
+
+En esta sección se presenta la distribución de los establecimientos atrasados según la cantidad de vacantes sin asignar (VAS). De esta forma es posible identificar si se tiene pocas VAS pero muchos establecimientos atrasados, o muchas VAS pero concentradas en pocos establecimientos.
+
+```{r fig_histogram}
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8 # Display as 75% of the page width
+#| fig-height: 5
+#| fig-align: center
+
+listado_ael_rbd <- params$ael_actual
+listado_ael_rbd = as.data.frame(listado_ael_rbd)
+
+if ( nrow(listado_ael_rbd) == 0){
+
+  knitr::asis_output(paste0("
+::: {.callout-tip title: \" ✅Establecimientos sin vacantes pendientes de asignar\"}
+Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pendientes.
+:::"
+))
+} else{
+
+  
+   colnames(listado_ael_rbd) <- c( "Comuna", "RBD", "Establecimiento", "Vacantes sin Asignar", "Niveles Atrasados", "Niveles Ofrecidos", "Promedio días sin movimiento en AEL" )
+
+mediana_vas <- listado_ael_rbd %>%
+  pull(`Vacantes sin Asignar`) %>%
+  median()
+
+datos_densidad <- listado_ael_rbd %>%
+  pull(`Vacantes sin Asignar`) %>%
+  density()
+
+altura_max <- max(datos_densidad$y)
+
+listado_ael_rbd %>%
+  ggplot(aes(x = `Vacantes sin Asignar`)) +
+  geom_density(fill = "#0F69B4", color = "#0F69B4", alpha = 0.7) +
+  geom_vline(xintercept = mediana_vas, linetype = "dashed", color = "#084A7A", linewidth = 0.8) +
+  geom_label_repel(
+    data = data.frame(x = mediana_vas, y = altura_max * 0.85),  # Posiciona al 85% de la altura máxima
+    aes(x = x, y = y, label = paste0("El 50% de los EE tiene\nmenos de ", round(mediana_vas, 1), " vacantes sin asignar")),
+    nudge_x = 5,
+    color = "black",
+    size = 11/.pt,
+    box.padding = 0.5,
+    point.padding = 0.3,
+    segment.color = "#084A7A",
+    segment.size = 0.5,
+    arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
+    min.segment.length = 0
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 14),
+    panel.grid = element_blank()
+  ) +
+  labs(title = "Densidad de EE según VAS", y ="Densidad")
+ }
+
+```
+
+
+
+
+## Comportamiento Histórico
 
 En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de Enero a Octubre 2025 para cada comuna del territorio, los datos se obtuvieron semanal actualizando el visor todos los lunes del año.
 
