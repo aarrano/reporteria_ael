@@ -73,7 +73,7 @@ indicadores_1 <- df_ael %>%
   filter(fecha_corte_info == fecha_ultima_actualización) %>%
   summarize(`Total de EE` = n_distinct(rbd),
             `EE atrasados` = n_distinct(rbd[condicion_rbd == 1]),
-            `Tasa de cumplimiento` = round(`EE atrasados`*100/`Total de EE`,1),
+            `Tasa de cumplimiento` = round((`Total de EE`-`EE atrasados`)*100/`Total de EE`,1),
             `Promedio dias atrasados` = round(mean(`promedio dias sin movimiento`[condicion_rbd == 1 & posibles_cupos>0]),1),
             `Vacantes sin asignar` = sum(posibles_cupos, na.rm = TRUE),
             .by = nombre_slep) %>% 
@@ -97,7 +97,7 @@ df_cuentas <- df_cuentas %>%
                         `Vacantes disponibles` = sum(vacantes_para_analisis, na.rm = TRUE),
                         .by = rbd) %>% 
               mutate(rbd = as.character(rbd))
-              , by = "rbd")
+            , by = "rbd")
 
 "Algunas variables quedan con NA porque no hay correos asociados al RBD en SIGE."
 df_cuentas[is.na(df_cuentas)] <- ""
@@ -142,7 +142,7 @@ temp_ael <- ael_t %>%
 # LOOP por SLEP ----
 pilotaje = c(6,7,10,11,15,22,24)
 
-for (s in nombre_sleps[6]) {
+for (s in nombre_sleps[7]) {
   
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
@@ -157,7 +157,7 @@ for (s in nombre_sleps[6]) {
   nombre = s
   
   ## Pasamos la lista de correos sin AEL ----
-'Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" una vez filtrada la tabla '
+  'Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" una vez filtrada la tabla '
   
   df_cuentas_slep_qmd <- df_cuentas_slep %>% 
     filter(nombre_slep == s) %>% 
@@ -174,7 +174,7 @@ for (s in nombre_sleps[6]) {
   ael_actual <- temp_ael %>% 
     filter(nombre_slep == s) %>% 
     select(-nombre_slep)
-
+  
   ## Quarto render ----
   
   quarto::quarto_render(
@@ -196,13 +196,13 @@ for (s in nombre_sleps[6]) {
       glosario = tabla_glosario,
       ael_actual = ael_actual
     ),
-    quiet = TRUE,
+    quiet = F,
     quarto_args = c("--output-dir", "../Minuta x SLEP./251027/"),
   )
   
-message("Reporte creado")
-
-#Fin del loop
+  message("Reporte creado")
+  
+  #Fin del loop
 }
 
 
