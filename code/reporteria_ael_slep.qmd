@@ -1,27 +1,27 @@
 ---
-title: "BORRADOR: Reporte proceso Anótate en la Lista (AEL) 2025"
+title: "Reporte proceso Anótate en la Lista (AEL) 2025"
 subtitle: "SLEP `r params$slep`"
+title-block-banner: "#f0f3f5"
+title-block-banner-color: "black"
 lang: es
 language:
   title-block-affiliation-single: "Departamento"
   title-block-author-single: "Autor"
 author:
-  - name: "Alonso Arraño"
-    affiliation: "Subdepto. de Instalación y Gestión Educativa"
+  - name: "Subdepto. de Instalación y Gestión Educativa"
 date: today
 date-format: "DD-MM-YYYY"
-format: 
+format:
   html:
     css: style.css
     self-contained: true
     fig-align: center
     html-table-processing: none
     page-layout: full
-    other-links: 
+    other-links:
       - href: https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9
         text: Visor AEL
         icon: speedometer
-        
       - href: https://educacionpublica.gob.cl/wp-content/uploads/2025/04/Orientaciones-Claves-SAE-y-NEP.pdf
         text: Doc. Orientaciones SAE
         icon: file-earmark
@@ -61,13 +61,21 @@ library(dplyr)
 library(tidyr)
 ```
 
-# Disclaimer
+# Estimadas Subdirecciones UATP y Encargadas/os SAE:
 
-El presente documento se encuentra en etapa borrador, esperando a ser validado y retroalimentado por los SLEP y las jefaturas de la División de Desarrollo Educativo. Por lo anterior, es que este reporte no puede ser compartido de forma oficial.
+Junto con saludarlos(as), desde la Dirección de Educación Pública ponemos a su disposición el informe sobre la gestión de listas de espera de matrícula en establecimientos de educación pública. Este documento busca facilitar información actualizada y analizada que oriente la toma de decisiones informadas en cada territorio.
 
-# Presentación
+La no gestión oportuna de las listas de espera constituye una situación que afecta directamente las trayectorias educativas de niñas, niños y jóvenes, oponiéndose a los principios y orientaciones de la Estrategia Nacional de Educación Pública, y debilitando la valoración de la educación. 
 
-Estimadas Subdirecciones y Encargados SAE:
+Garantizar la continuidad educativa y el derecho a aprender requiere de una acción activa de los establecimientos en distintas dimensiones, entre ellas, actualizar sus listas de espera, lo que promueve el acceso y permanencia de las y los estudiantes en el sistema educativo.
+
+Desde la Dirección de Educación Pública, reafirmamos nuestro compromiso con el fortalecimiento de la educación pública y con el acompañamiento a las comunidades educativas. A través de la red de encargados SAE y la entrega de este y otros informes, buscamos contribuir a una gestión informada y a la toma de decisiones basadas en datos que resguarden las trayectorias educativas continuas y significativas.
+
+Agradecemos el compromiso y los esfuerzos que realizan los equipos educativos por garantizar el acceso, la asistencia y la revinculación de sus estudiantes, avanzando juntos hacia una educación pública más inclusiva, equitativa y de calidad
+
+<p style="text-align: center;">Dirección de Educación Pública.</p>
+
+# Sobre el proceso de Anótate en la Lista
 
 Este reporte busca entregar información respecto del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**, el que se encuentra asociado al **Sistema de Admisión Escolar (SAE)** y que funciona de forma paralela a los procesos de admisión principal y complementarios. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de las matrículas 2026. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, es que la gestión de las vacantes disponibles, permiten proteger las trayectorias educativas de los estudiantes.
 
@@ -386,12 +394,12 @@ listado_ael_rbd %>%
 
 ## Comportamiento Histórico
 
-En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de Enero a Octubre 2025 para cada comuna del territorio, los datos se obtuvieron semanal actualizando el visor todos los lunes del año.
+En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de Enero a Octubre 2025 para cada comuna del territorio, los datos se obtuvieron con una frecuencia semanal, actualizando el visor todos los lunes del año.
 
 ::: callout-warning
 # Antecedentes de fiscalización
 
-La **Superintendencia de Educación** compartió a través del oficio N 492 del **26 de marzo de 2025**, las instrucciones y consecuencias de la faltas de gestión de las listas de espera. Lo hizo anteriormente en el oficio N 164 el 27 de enero de 2025.
+La **Superintendencia de Educación** compartió a través del oficio N\° 492 del **26 de marzo de 2025** las instrucciones y consecuencias de la faltas de gestión de las listas de espera. Lo hizo anteriormente en el oficio N 164 el 27 de enero de 2025.
 
 El oficio puede revisarse en el siguiente enlace $\longrightarrow$ [link](https://www.supereduc.cl/wp-content/uploads/2024/03/ORD-No-0492-INFORMA-SOBRE-PROCEDIMIENTO-REGULACION-DEL-SAE-A_SOSTENEDORES-Y-DIREC.-DE-ESTABLECIMIENTOS-EDUC.-1.pdf)
 :::

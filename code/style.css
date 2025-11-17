@@ -16,6 +16,20 @@ p {
   z-index: 1000;
 }
 
+/* La fecha debería aparecer en negrita */
+h1.title {
+  font-weight: bold;
+}
+
+/* Fuerza la negrita para la etiqueta de la fecha (ej. "Publicado") */
+.quarto-title-meta .quarto-title-meta-heading .date-label {
+  font-weight: bold !important;
+}
+/* Esto apunta al valor de la fecha ("17-11-2025") */
+.quarto-title-meta .date {
+  font-weight: bold !important;
+}
+
 --- 
 
 

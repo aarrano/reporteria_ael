@@ -60,6 +60,10 @@ df_ael <- df_ael %>% filter(!nombre_slep %in% c("Marga Marga","Tamarugal"))
 nombre_sleps <- unique(df_ael$nombre_slep)
 print(length(nombre_sleps))
 
+df_ael <- df_ael %>% mutate(tipo = "DEP")
+df_cuentas <- df_cuentas %>% mutate(tipo = "DEP")
+ael_t <- ael_t %>% mutate(tipo = "DEP")
+
 ## Definimos bases para filtrar ----
 message("Debemos generar distintas bases para poder acceder a los distintos indicadores que generan el reporte, ideal para que el loop no tome tanto tiempo")
 
@@ -76,10 +80,10 @@ indicadores_1 <- df_ael %>%
             `Tasa de cumplimiento` = round((`Total de EE`-`EE atrasados`)*100/`Total de EE`,1),
             `Promedio dias atrasados` = round(mean(`promedio dias sin movimiento`[condicion_rbd == 1 & posibles_cupos>0]),1),
             `Vacantes sin asignar` = sum(posibles_cupos, na.rm = TRUE),
-            .by = nombre_slep) %>% 
+            .by = tipo) %>% 
   left_join(df_cuentas %>%
-              summarize(`EE sin cuentas`=n(),.by = nombre_slep),
-            by = "nombre_slep") %>% 
+              summarize(`EE sin cuentas`=n(),.by = tipo),
+            by = "tipo") %>% 
   mutate(`Tasa EE sin cuenta` = round(`EE sin cuentas`*100/`Total de EE`,1)) %>% 
   mutate(`Tasa EE sin cuenta` = if_else(is.na(`EE sin cuentas`) ,0,`Tasa EE sin cuenta`))
 
@@ -125,9 +129,7 @@ df_cuentas_slep <- df_cuentas %>%
 
 "Generamos una base con el histórico de Vacantes sin Asignar, por fecha y comuna"
 temp_1 <- df_ael %>%
-  summarize(vas = sum(posibles_cupos,na.rm = TRUE),.by = c(nombre_slep,fecha_corte_info,comuna)) %>% 
-  mutate(comuna2=comuna)
-
+  summarize(vas = sum(posibles_cupos,na.rm = TRUE),.by = c(nombre_slep,fecha_corte_info)) 
 message("Con los distintos DF puntuales creados, se procede al loop para generar los reportes de cada SLEP")
 
 ### 4 - Listado AEL actual por establecimiento 
@@ -139,22 +141,17 @@ temp_ael <- ael_t %>%
   select(nombre_slep,comuna,rbd,nombre_ee,`total posibles cupos`,`total niveles atrasados`,`total niveles ofrecidos`,`promedio dias sin movimiento`) %>% 
   rename(`Vacantes sin asignar` = `total posibles cupos`)
 
-# LOOP por SLEP ----
-pilotaje = c(6,7,10,11,15,22,24)
-
-for (s in nombre_sleps[1]) {
+# Documento DEP
   
-  "Hacemos el print de qué SLEP se está generando"
-  print(paste("Trabajando en el slep", s))
   
   ## Pasamos los indicadores claves del SLEP ----
-  n_ee <- indicadores_1[nombre_sleps == s, 2]
-  n_ee_atrasados <-  indicadores_1[nombre_sleps == s, 3]
-  n_ee_sin_cuenta <-  indicadores_1[nombre_sleps == s, 7]
-  tasa_cumplimiento <-  indicadores_1[nombre_sleps == s, 4]
-  dias_sin_mov <-  indicadores_1[nombre_sleps == s, 5]
-  vas <- indicadores_1[nombre_sleps == s, 6]
-  nombre = s
+  n_ee <- indicadores_1[, 2]
+  n_ee_atrasados <-  indicadores_1[, 3]
+  n_ee_sin_cuenta <-  indicadores_1[, 7]
+  tasa_cumplimiento <-  indicadores_1[, 4]
+  dias_sin_mov <-  indicadores_1[, 5]
+  vas <- indicadores_1[, 6]
+  nombre = "DEP"
   
   ## Pasamos la lista de correos sin AEL ----
   'Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" una vez filtrada la tabla '
@@ -197,13 +194,13 @@ for (s in nombre_sleps[1]) {
       ael_actual = ael_actual
     ),
     quiet = F,
-    quarto_args = c("--output-dir", "../Minuta x SLEP./251117/"),
+    quarto_args = c("--output-dir", "../Minuta x SLEP./251027/"),
   )
   
   message("Reporte creado")
   
   #Fin del loop
-}
+
 
 
 
