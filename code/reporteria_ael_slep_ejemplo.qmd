@@ -1,0 +1,635 @@
+---
+title: "Reporte proceso Anótate en la Lista (AEL) 2025"
+subtitle: "SLEP `r params$slep2`"
+lang: es
+language:
+  title-block-affiliation-single: "Departamento"
+  title-block-author-single: "Autor"
+author:
+  - name: "Subdepto. de Instalación y Gestión Educativa"
+    affiliation: "División de Desarrollo Educativo"
+date: today
+date-format: "10-11-2025"
+format: 
+  html:
+    css: style.css
+    self-contained: true
+    fig-align: center
+    html-table-processing: none
+    page-layout: full
+    other-links: 
+      - href: https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9
+        text: Visor AEL
+        icon: speedometer
+        
+      - href: https://educacionpublica.gob.cl/wp-content/uploads/2025/04/Orientaciones-Claves-SAE-y-NEP.pdf
+        text: Doc. Orientaciones SAE
+        icon: file-earmark
+toc: true
+toc-depth: 2
+number-sections: true
+execute:
+  echo: false
+  warning: false
+  message: false
+params:
+  slep: nombre
+  slep2: nombre2
+  glosario: null
+  n_ee: null
+  n_ee_atrasados: null
+  n_ee_sin_cuenta: null
+  tasa_cumplimiento: null
+  dias_sin_mov: null
+  listado_cuentas: null
+  vas: null
+  data_fig_1: null
+  graf_lineas: null
+  ael_actual: null
+output-dir: ../../Minuta x SLEP 
+---
+
+<img src="logo_dep.png" id="logo-fixed"/>
+
+```{r}
+#| label: Paquetes
+#| include: false
+
+Sys.setlocale("LC_TIME", "es_ES.UTF-8")
+pacman::p_load(tidyverse,data.table,openxlsx,janitor,gt,fontawesome,ggrepel)
+
+library(dplyr)
+library(tidyr)
+```
+
+# Presentación
+
+Estimadas Subdirecciones y Encargados SAE:
+
+Este reporte busca entregar información respecto del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**, el que se encuentra asociado al **Sistema de Admisión Escolar (SAE)** y que funciona de forma paralela a los procesos de admisión principal y complementarios. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de las matrículas 2026. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, es que la gestión de las vacantes disponibles, permiten proteger las trayectorias educativas de los estudiantes.
+
+En este documento podrá encontrar información resumida y agregada a nivel de establecimiento, gráficos con el comportamiento en el tiempo de las **vacantes sin asignar**,tablas con el listado de establecimientos que no poseen cuentas activas para la gestión del AEL, listados de los establecimientos que deberían ser priorizados para mejorar la gestión y eficiencia del proceso **Anótate en la lista** debido a altas listas de espera o una gran cantidad de días sin gestión de vacantes sin asignar.
+
+La información disponible en este documento se basa únicamente en los establecimientos participantes del SAE, incluyendo los niveles desde Prekínder hasta 4° medio, excluyendo las modalidades de educación especial, artística , EPJA, Salas Cunas y Jardines Infantiles.
+
+::: callout-tip
+## Importante
+
+*Este reporte contiene datos de los cuerpos directivos de los establecimientos e información administrativa sensible pensada en apoyar la gestión del SLEP para garantizar el derecho a la educación de los estudiantes y no constituye un indicador de rendición de cuentas, por lo que los datos deben ser tratados con los resguardos de seguridad de la información necesarios*
+:::
+
+# Glosario:
+
+A continuación se presenta un glosario con las variables utilizadas y sus respectivas definiciones:
+
+```{r tabla_glosario}
+#| echo: false
+#| message: false
+#| warning: false
+
+glosario <- params$glosario
+glosario = as.data.frame(glosario)
+
+glosario %>%
+  gt() %>%
+  opt_align_table_header(align = "left") %>%
+  tab_options(
+    heading.padding = px(1),
+    table.width = pct(100),
+    table.font.size = 14
+  ) %>%
+  tab_style( #Negrita primera fila
+    style = cell_text(weight = "bold", color = "#0F69B4"),
+    locations = cells_column_labels(everything())
+  ) %>%
+  tab_style( #Negrita para primera columna
+    style = cell_text(weight = "bold",  color = "#0F69B4"),
+    locations = cells_body(columns = 1)) %>% 
+  cols_align(align = "left", columns = c(1, 2)) %>% 
+  cols_width(Variable ~ px(70),
+             Definición ~ px(180)) %>% 
+  tab_header(title = "Tabla 1: Glosario de variables utilizadas en el informe.")
+  
+```
+
+## Cálculo de vacantes sin asignar
+
+Las vacantes sin asignar corresponden al indicador utilizado por la DEP para monitorear la cantidad de estudiantes que pueden matricularse en un establecimiento en un período determinado del tiempo. Este indicador permite la agregación por establecimiento, nivel, comuna y SLEP, además de ser de fácil monitoreo y comunicación.
+
+A continuación se presenta el cálculo de las **Vacantes Sin Asignar** (VAS) y un ejemplo concreto.
+
+$$
+\text{Vacantes sin Asignar (VAS)} = \text{mínimo}\{\text{Vacantes disponibles, Lista de espera}\}
+$$
+
+En el siguiente ejemplo, se presentan dos escenarios que dan cuenta del cálculo de las VAS disponibles.
+
+$$
+\text{Vacantes sin asignar (VAS)} =\begin{cases}
+    \text{10 Vacantes y 5 estudiantes en Lista de espera} & \longrightarrow \text{5 VAS} \\
+    \text{10 Vacantes y 20 estudiantes en Lista de espera} & \longrightarrow \text{10 VAS}
+  \end{cases}
+$$
+
+1.  En el **primer escenario**, las vacantes sin asignar corresponden al total de estudiantes en Listas de espera, que es menor a la cantidad de vacantes disponibles. En el Establecimiento aún quedarían 5 vacantes disponibles.
+
+2.  En el **segundo escenario**, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incoporar más estudiantes que la oferta disponible.
+
+# Estado del territorio
+
+::::::::::::::: {.grid .indicadores}
+::::: {.valuebox .green}
+::: caption
+Establecimientos en SAE
+:::
+
+::: value
+`r params$n_ee`
+:::
+:::::
+
+::::: {.valuebox .yellow}
+::: caption
+Establecimientos atrasados
+:::
+
+::: value
+`r params$n_ee_atrasados`
+:::
+:::::
+
+::::: {.valuebox .blue}
+::: caption
+Vacantes sin asignar
+:::
+
+::: value
+`r params$vas`
+:::
+:::::
+
+::::: {.valuebox .red}
+::: caption
+Establecimientos sin cuenta activa
+:::
+
+::: value
+`r params$n_ee_sin_cuenta`
+:::
+:::::
+:::::::::::::::
+
+## Establecimientos sin cuentas activas
+
+Para una correcta gestión del **Anótate en la lista** es necesario que todos los establecimientos del SLEP `r params$nombre` cumplan con mantener la información de contacto de Directores/as y Encargadas/os SAE actualizada en **SIGE**.
+
+La información de contacto es utilizada por el Mineduc para la creación de los usuarios, a través del envío de un mail automático a ambos actores, por lo que **si esta información se encuentra desactualizada en SIGE no es posible la creación de la cuenta**, y en consecuencia, no es posible gestionar las listas de espera, afectando el derecho a la educación de los postulantes.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+aux_cuentas <- params$n_ee_sin_cuenta
+if (aux_cuentas != 0) {
+  porcentaje <- round(params$n_ee_sin_cuenta * 100 / params$n_ee, 1)
+  
+  knitr::asis_output(paste0("
+::: {.callout-important title=\"Alerta de establecimientos sin cuentas activas\"}
+En su SLEP actualmente un **", porcentaje, "%** de sus establecimientos no poseen ninguna cuenta activa (Director/Encargado SAE).
+:::
+"))
+}
+```
+
+A continuación se presenta la lista de establecimientos que no tienen cuenta activa para gestionar el AEL y su respectiva cantidad de estudiantes en lista de espera.
+
+1.  **Mail Director/Encargado SAE**: Mail registrado en SIGE al cual se envió el enlace para la creación de usuario:
+2.  **Fecha envío correo Director/Encargado SAE**: Fecha en que se envió el correo por parte de Mineduc para la creación de la cuenta.
+
+**Nota 1:** Si la información de correo aparece en blanco, es porque en SIGE no hay un correo registrado para ese cargo. **Nota 2:** Es posible que el correo enviado por Mineduc se aloje en la carpeta SPAM.
+
+::: callout-tip
+## Importante
+
+Los datos de cuentas inactivas presentan una frecuencia irregular de actualización, por lo que la información presentada en el presente reporte puede estar desfasada. 
+
+Adicionalmente, es posible que se contabilicen establecimientos sin cuenta activa pero que estén gestionado las listas de espera, esto debido a que se puede estar utilizando un usuario que ya no se encuentra trabajando en el establecimiento. 
+
+Por lo anterior, es que todo establecimiento que no tenga una cuenta creada para el actual director/a o encargado/a SAE aparecerá categorizado como establecimiento inactivo.
+:::
+
+Para información más actualizada puede acceder al **Visor Anótate en la Lista** en el siguiente enlace $\longrightarrow$ [Visor Anótate en la lista](https://app.powerbi.com/view?r=eyJrIjoiZDAyMzNlYmUtMjkxMS00NDYyLTgzMjItZGFmYTA2NWExMzE5IiwidCI6Ijc4ZjNkZTcwLWEzNWItNDgwNy04N2M0LTgwZDg3YWNlZmY4NyJ9)
+
+```{r cuentas_slep}
+#| echo: false
+#| message: false
+#| warning: false
+#| results: "asis"
+
+  listado_cuentas_table <- data.frame(
+  establecimiento = c(
+    'ESCUELA ADELAIDA MIGUIELES SOTO - 4994',
+    'ESCUELA BASICA LA HUERTA - 11676',
+    'ESCUELA BASICA PATAGUAL - 5006',
+    'ESCUELA ISIDORA GOYENECHEA - 4953'
+  ),
+  `Lista de espera` = c(0, 0, 1, 2),
+  correo_director = c(
+    '',  # Dato faltante
+    '',  # Dato faltante
+    'peyoflores@gmail.com',
+    'patricio.ramirez@gmai.com'
+  ),
+  correo_encargado_sae = c(
+    'escuela.adelaidamiguielessoto@gmai.com',
+    'nelsonespejogutierrez@gmail.com',
+    'peyoflores@gmail.com',
+    'trinidadesperanzamedina@gmail.com'
+  ),
+  fecha_creacion_director = c(
+    '',  # Dato faltante
+    '',  # Dato faltante
+    '27-02-2025',
+    '16-05-2025'
+  ),
+  fecha_creacion_encargado_sae = c(
+    '22-08-2025',
+    '27-02-2025',
+    '27-02-2025',
+    '27-02-2025'
+  ),
+  check.names = FALSE,  # Para mantener el nombre "Lista de espera" con espacio
+  stringsAsFactors = FALSE
+)
+  
+  colnames(listado_cuentas_table) <- c( "Establecimiento", "Lista de espera", "Mail Director", "Mail encargado SAE", "Fecha envio correo Director", "Fecha envio correo SAE" )
+  
+  listado_cuentas_table %>%
+    arrange(-`Lista de espera`) %>% 
+    gt() %>%
+    opt_interactive(
+      use_filters = TRUE,
+      use_resizers = TRUE,
+      use_highlight = TRUE,
+      use_compact_mode = TRUE,
+      use_text_wrapping = FALSE,
+      use_page_size_select = TRUE
+    ) %>% tab_header(
+      title = md(
+        "**Listado de EE sin cuentas activas** (Ni director Ni encargado SAE)"
+      ),
+      subtitle = "Ordenado según Lista de Espera"
+    ) %>%
+    opt_align_table_header(align = "left") %>%
+    tab_options(
+      heading.padding = px(1),
+      table.width = pct(100),
+      table.font.size = 14,
+      ihtml.use_text_wrapping = TRUE
+    ) %>%
+    cols_width(
+      colnames(listado_cuentas_table)[2] ~ px(60),
+      colnames(listado_cuentas_table)[5] ~ px(90),
+      colnames(listado_cuentas_table)[6] ~ px(90)
+    ) %>%
+    cols_align(align = "center", columns = c(2, 5, 6)) %>% 
+    tab_footnote(footnote = "La información actualizada se encuentra en el visor compartido")
+  
+```
+
+## Estado de las Vacantes sin Asignar
+
+::: callout-caution
+# Establecimientos atrasados en la gestión de AEL
+
+En su SLEP actualmente hay un total de **`r params$n_ee_atrasados` establecimientos atrasados**, los que representan un total de **`r params$vas` vacantes sin asignar**.
+:::
+
+En la siguiente Figura se aprecia la distribución de los **26 SLEP** en régimen al 2025, donde el círculo de color diferente es la ubicación de su SLEP según la **tasa de cumplimiento** (eje horizontal) y las vacantes sin asignar (VAS, eje vertical)
+
+```{r fig_scatter}
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-align: center
+
+datos_fig_1 <- params$data_fig_1
+datos_fig_1 = as.data.frame(datos_fig_1)
+max_fig_1 = ceiling(max(datos_fig_1$Vacantes.sin.asignar) / 50) * 50
+datos_fig_1 <-datos_fig_1 %>%  mutate(nombre_ejemplo="Ejemplo")
+
+#print(datos_fig_1)
+
+datos_fig_1 %>%
+    mutate(nombre_slep = if_else(nombre_slep == params$slep, nombre_slep, "")) %>%
+  mutate(nombre_slep= if_else(nombre_slep != "", "ejemplo",nombre_slep)) %>% 
+    ggplot(aes(x = Tasa.de.cumplimiento, y = Vacantes.sin.asignar , fill = nombre_slep))+
+    geom_point(aes(color= nombre_slep, fill= nombre_slep),
+               size = 4, alpha = 0.5,
+               shape = 21,
+               show.legend = FALSE) + # This is a dot with both border (color) and fill.
+    theme_minimal()+
+    geom_text_repel(
+      aes(label = nombre_slep),
+      color = "black",
+      size = 11/.pt, # font size 9 pt
+      point.padding = 0.1,
+      box.padding = 0.6,
+      min.segment.length = 0,
+      max.overlaps = 1000,
+      seed = 7654 # For reproducibility reasons
+    )+
+  scale_x_continuous(n.breaks = 6)+
+  scale_y_continuous(limits = c(0, max_fig_1), 
+                     breaks = seq(0, max_fig_1, length.out = 6),
+                     expand = c(0.03,0.04 ))+
+  labs(x = "Tasa de cumplimiento(%)", y = "Total Vacantes sin asignar", title = "Distribución de los SLEP según % de cumplimiento y VAS")
+
+```
+
+## Distribución de los establecimientos atrasados
+
+En esta sección se presenta la distribución de los establecimientos atrasados según la cantidad de vacantes sin asignar (VAS). De esta forma es posible identificar si se tiene pocas VAS pero muchos establecimientos atrasados, o muchas VAS pero concentradas en pocos establecimientos.
+
+```{r fig_histogram}
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8 # Display as 75% of the page width
+#| fig-height: 5
+#| fig-align: center
+
+listado_ael_rbd <- params$ael_actual
+listado_ael_rbd = as.data.frame(listado_ael_rbd)
+
+if ( nrow(listado_ael_rbd) == 0){
+
+  knitr::asis_output(paste0("
+::: {.callout-tip title: \" ✅Establecimientos sin vacantes pendientes de asignar\"}
+Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pendientes.
+:::"
+))
+} else{
+
+  
+   colnames(listado_ael_rbd) <- c( "Comuna", "RBD", "Establecimiento", "Vacantes sin Asignar", "Niveles Atrasados", "Niveles Ofrecidos", "Promedio días sin movimiento en AEL" )
+
+mediana_vas <- listado_ael_rbd %>%
+  pull(`Vacantes sin Asignar`) %>%
+  median()
+
+datos_densidad <- listado_ael_rbd %>%
+  pull(`Vacantes sin Asignar`) %>%
+  density()
+
+altura_max <- max(datos_densidad$y)
+
+listado_ael_rbd %>%
+  ggplot(aes(x = `Vacantes sin Asignar`)) +
+  geom_density(fill = "#0F69B4", color = "#0F69B4", alpha = 0.7) +
+  geom_vline(xintercept = mediana_vas, linetype = "dashed", color = "#084A7A", linewidth = 0.8) +
+  geom_label_repel(
+    data = data.frame(x = mediana_vas, y = altura_max * 0.85),  # Posiciona al 85% de la altura máxima
+    aes(x = x, y = y, label = paste0("El 50% de los EE tiene\nmenos de ", round(mediana_vas, 1), " vacantes sin asignar")),
+    nudge_x = 5,
+    color = "black",
+    size = 11/.pt,
+    box.padding = 0.5,
+    point.padding = 0.3,
+    segment.color = "#084A7A",
+    segment.size = 0.5,
+    arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
+    min.segment.length = 0
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 14),
+    panel.grid = element_blank()
+  ) +
+  labs(title = "Densidad de EE según VAS", y ="Densidad")
+ }
+
+```
+
+
+
+
+## Comportamiento Histórico
+
+En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de Enero a Octubre 2025 para cada comuna del territorio, los datos se obtuvieron con una frecuencia semanal, actualizando el visor todos los lunes del año.
+
+::: callout-warning
+# Antecedentes de fiscalización
+
+La **Superintendencia de Educación** compartió a través del oficio N\° 492 del **26 de marzo de 2025** las instrucciones y consecuencias de la faltas de gestión de las listas de espera. Lo hizo anteriormente en el oficio N 164 el 27 de enero de 2025.
+
+El oficio puede revisarse en el siguiente enlace $\longrightarrow$ [link](https://www.supereduc.cl/wp-content/uploads/2024/03/ORD-No-0492-INFORMA-SOBRE-PROCEDIMIENTO-REGULACION-DEL-SAE-A_SOSTENEDORES-Y-DIREC.-DE-ESTABLECIMIENTOS-EDUC.-1.pdf)
+:::
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| out-width: "100%" # Display as 75% of the page width
+#| out-height: "120%"
+
+temp_2 <- params$graf_lineas
+temp_2 = as.data.frame(temp_2)
+temp_2 <- temp_2 %>% 
+  mutate(fecha_corte_info = as.Date(fecha_corte_info, format = "%d-%m-%Y")) %>% 
+  mutate(comuna = case_when(
+    comuna == "Coronel" ~ "Comuna 1",
+    comuna == "San Pedro de la Paz" ~ "Comuna 2",
+    comuna == "Lota" ~ "Comuna 3",
+    comuna == "Santa Juana" ~ "Comuna 4",
+    TRUE ~ "Otro"  # Mantener valor original si no coincide
+  )) %>% 
+  mutate(comuna2 = comuna)
+
+temp_2 %>%
+  ggplot(aes(x = fecha_corte_info, y = vas, colour  = comuna)) +
+  geom_line(
+    data = temp_2 %>% select(-comuna),
+    aes(group = comuna2),
+    color = "grey",
+    size = 0.5,
+    alpha = 0.5
+  ) +
+  geom_line(aes(color = comuna), color = "#69b3a2", size = 1.2) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 14),
+    panel.grid = element_blank()
+  ) +
+labs(
+    title = "Vacantes sin asignar durante el 2025, por comuna y día",
+    subtitle = "Datos semanales",
+    x = NULL,
+    y = "Vacantes sin Asignar (VAS)"
+  ) +
+facet_wrap( ~ comuna, ncol = 2) 
+
+```
+
+### Variación vacantes sin Asignar
+
+En esta sección se presenta el estado **actual** de las vacantes sin asignar por comuna.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+
+temp_3 <- params$graf_lineas
+temp_3 = as.data.frame(temp_3)
+
+temp_3 <- temp_3 %>% 
+  mutate(fecha_corte_info = as.Date(fecha_corte_info, format = "%d-%m-%Y")) %>% 
+  slice_max(order_by =fecha_corte_info , by = comuna, n =2) %>% 
+  mutate(fecha_corte_info = format(fecha_corte_info, "%A %d %B")) #Al pasar el as.Date transforma la fecha en el formato gringo entonces hay que devolverlo al formato de Chile.
+
+temp_3 <- temp_3 %>% 
+  summarize(`total VAS`= sum(vas, na.rm=TRUE),
+            .by = c(comuna,fecha_corte_info)) %>% 
+  pivot_wider(names_from = fecha_corte_info,
+              values_from = `total VAS`) %>% 
+  rename(Comuna=comuna)
+
+temp_3 <- temp_3 %>%
+    mutate(`Variación entre mediciones` = .[[2]] - .[[3]])
+
+# glimpse(temp_3)
+
+temp3 <- temp_3 %>%
+  adorn_totals(where = "row", fill = "Total")
+
+n_filas <- nrow(temp3)
+
+  temp3 <- temp3 %>% mutate(Comuna = case_when(
+    Comuna == "Coronel" ~ "Comuna 1",
+    Comuna == "San Pedro de la Paz" ~ "Comuna 2",
+    Comuna == "Lota" ~ "Comuna 3",
+    Comuna == "Santa Juana" ~ "Comuna 4",
+    TRUE ~ "Total"
+  ))
+
+
+temp3 %>%
+  gt() %>%
+  opt_align_table_header(align = "left") %>%
+  tab_options(
+    heading.padding = px(1),
+    table.width = pct(100),
+    table.font.size = 14
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold", color = "#0F69B4"),
+    locations = cells_column_labels(everything())
+  ) %>%
+  tab_style(style = cell_text(v_align = "middle"),
+            locations = cells_column_labels()) %>%
+  tab_style(
+    #Negrita para primera columna
+    style = cell_text(weight = "bold", color = "#0F69B4"),
+    locations = cells_body(columns = 1)
+    ) %>%
+  tab_style(style = cell_text(weight = "bold", color = "#0F69B4"),
+             locations = cells_body(rows = n_filas)
+    ) %>% 
+  cols_align(align = "center", columns = c(2, 3, 4)) %>%
+  tab_footnote(footnote = "Fuente: Visor Anótate en la lista, 2025.") %>%
+  cols_width(colnames(temp_3)[2] ~ px(90),
+             colnames(temp_3)[3] ~ px(90),
+             colnames(temp_3)[4] ~ px(80))
+
+  
+```
+
+### Listado de gestión.
+
+En esta sección se presenta el listado de establecimientos según criticidad, ordenados por la cantidad de vacantes sin asignar.
+
+```{r listado_rbds_gestion}
+#| echo: false
+#| message: false
+#| warning: false
+
+listado_ael_rbd <- params$ael_actual
+listado_ael_rbd = as.data.frame(listado_ael_rbd)
+listado_ael_rbd <- listado_ael_rbd %>% 
+  mutate(
+    comuna = case_when(
+      row_number() %% 4 == 1 ~ "Comuna1",
+      row_number() %% 4 == 2 ~ "Comuna2",
+      row_number() %% 4 == 3 ~ "Comuna3",
+      row_number() %% 4 == 0 ~ "Comuna4"
+    ),
+    rbd = 10000 + row_number() * 100,  # RBD de 5 dígitos
+    nombre_ee = case_when(
+      row_number() == 1 ~ "LICEO CENTRAL",
+      row_number() == 2 ~ "ESC HORIZONTE",
+      row_number() == 3 ~ "LICEO PROGRESO",
+      row_number() == 4 ~ "COLEGIO AURORA",
+      row_number() == 5 ~ "ESC LAS FLORES",
+      row_number() == 6 ~ "LICEO ESTRELLA",
+      TRUE ~ paste0("ESCUELA ", row_number())
+    )
+  )
+
+
+if ( nrow(listado_ael_rbd) == 0){
+  
+  knitr::asis_output(paste0("
+::: {.callout-tip title: \" ✅Establecimientos sin vacantes pendientes de asignar\"} 
+Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pendientes.
+:::"
+))
+} else{
+  
+  colnames(listado_ael_rbd) <- c( "Comuna", "RBD", "Establecimiento", "Vacantes sin Asignar", "Niveles Atrasados", "Niveles Ofrecidos", "Promedio días sin movimiento en AEL" )
+
+  
+
+listado_ael_rbd %>%
+    gt() %>%
+    opt_interactive(
+      use_filters = TRUE,
+      use_resizers = TRUE,
+      use_highlight = TRUE,
+      use_compact_mode = TRUE,
+      use_text_wrapping = FALSE,
+      use_page_size_select = TRUE
+    ) %>% 
+    tab_header(
+      title = md("**Estado actual del AEL por Establecimiento**"),
+      subtitle = "Ordenado según Vacantes sin asignar"
+    ) %>%
+    opt_align_table_header(align = "left") %>%
+    tab_options(
+      heading.padding = px(1),
+      column_labels.padding = px(5),
+      table.width = pct(100),
+      table.font.size = 14,
+      ihtml.use_text_wrapping = TRUE,
+      column_labels.font.weight = "bold"
+    ) %>%
+    cols_width(
+      colnames(listado_ael_rbd)[1] ~ px(100),
+      colnames(listado_ael_rbd)[2] ~ px(60),
+      colnames(listado_ael_rbd)[4] ~ px(80),
+      colnames(listado_ael_rbd)[5] ~ px(80),
+      colnames(listado_ael_rbd)[6] ~ px(80),
+      colnames(listado_ael_rbd)[7] ~ px(110)
+    ) %>%
+    cols_align(align = "center", columns = c(2, 4, 5, 6, 7)) %>% 
+    tab_style(
+      style = cell_text(color = "#0F69B4", weight = "bold", v_align = "middle"),
+      locations = cells_column_labels(columns = everything())
+    ) %>%
+    tab_footnote(footnote = "La información actualizada se encuentra en el visor compartido")
+  }
+```
