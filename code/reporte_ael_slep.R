@@ -22,18 +22,18 @@ year_actual <- year(today())
 ## Pathways ---
 
 #Acceso al maestro del AEL
-link_maestro <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/output/df_maestro_ael_2025.csv"
+link_maestro <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/output/maestro/df_maestro_ael_2026.csv"
 
 #Acceso al ultimo AEL
-link_1 <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/output/datos visualizador 24_10_28/"
-files <- list.files(link_1,full.names = TRUE)
+link_1 <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/output/"
+files <- list.files(link_1,full.names = TRUE,pattern = ".csv")
 
 ael_t <- fread(files[length(files)-1])
 
 message(paste("Leyendo el archivo",files[length(files)-1],"como archivo actual"))
 
 #Acceso al estado de cuentas 
-link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/output/Cuentas Activas/cuentas_activas.xlsx"
+link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/data/Cuentas/cuentas_activas.xlsx"
 
 #Cargamos tabla con definiciones para el glosario
 tabla_glosario <- read.xlsx("./inputs_qmd/tabla_glosario.xlsx")
@@ -49,14 +49,13 @@ df_cuentas <- df_cuentas%>%
 ## Trabajando información ----
 
 # Añadimos un recordatorio para que avise el código si nos equivocamos en la cantidad de SLEP
-if (year_actual != "2025") {
+if (year_actual != "2026") {
   stop("❌ Debes actualizar el código para que la generación de reportes incluya a los SLEP que están en su primer año de instalación.")
 } else {
   message("✅ El código se encuentra actualizado para los SLEP en régimen.")
 }
 
-# Dejamos solo los 26 SLEP actuales
-df_ael <- df_ael %>% filter(!nombre_slep %in% c("Marga Marga","Tamarugal")) 
+# SLEP en régimen
 nombre_sleps <- unique(df_ael$nombre_slep)
 print(length(nombre_sleps))
 
@@ -67,7 +66,7 @@ message("Debemos generar distintas bases para poder acceder a los distintos indi
 "Esta sección incluye los 5 indicadores mas utilizados: Total de EE, EE atrasados, % de cumplimiento, Prom. dias sin movimiento, EE sin cuentas activas"
 
 fecha_ultima_actualización <- max(df_ael$fecha_corte_info)
-print(paste("Los últimos datos corresponden a",fecha_ultima_actualización))
+print(paste("Los últimos datos corresponden al",fecha_ultima_actualización))
 
 indicadores_1 <- df_ael %>%
   filter(fecha_corte_info == fecha_ultima_actualización) %>%
@@ -140,9 +139,9 @@ temp_ael <- ael_t %>%
   rename(`Vacantes sin asignar` = `total posibles cupos`)
 
 # LOOP por SLEP ----
-pilotaje = c(6,7,10,11,15,22,24)
+#pilotaje = c(6,7,10,11,15,22,24)
 
-for (s in nombre_sleps[1]) {
+for (s in nombre_sleps) {
   
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
@@ -197,10 +196,10 @@ for (s in nombre_sleps[1]) {
       ael_actual = ael_actual
     ),
     quiet = F,
-    quarto_args = c("--output-dir", "../Minuta x SLEP./251117/"),
+    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260105/"),
   )
   
-  message("Reporte creado")
+  message("Reportes creados")
   
   #Fin del loop
 }

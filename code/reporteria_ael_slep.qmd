@@ -1,5 +1,5 @@
 ---
-title: "Reporte proceso Anótate en la Lista (AEL) 2025"
+title: "Reporte proceso Anótate en la Lista (AEL) 2026"
 subtitle: "SLEP `r params$slep`"
 title-block-banner: "#f0f3f5"
 title-block-banner-color: "black"
@@ -77,7 +77,7 @@ Agradecemos el compromiso y los esfuerzos que realizan los equipos educativos po
 
 # Sobre el proceso de Anótate en la Lista
 
-Este reporte busca entregar información respecto del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**, el que se encuentra asociado al **Sistema de Admisión Escolar (SAE)** y que funciona de forma paralela a los procesos de admisión principal y complementarios. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de las matrículas 2026. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, es que la gestión de las vacantes disponibles, permiten proteger las trayectorias educativas de los estudiantes.
+Este reporte busca entregar información respecto del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**, el que se encuentra asociado al **Sistema de Admisión Escolar (SAE)** y que funciona de forma paralela a los procesos de admisión principal y complementarios. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de las matrículas 2027. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, es que la gestión de las vacantes disponibles, permiten proteger las trayectorias educativas de los estudiantes.
 
 En este documento podrá encontrar información resumida y agregada a nivel de establecimiento, gráficos con el comportamiento en el tiempo de las **vacantes sin asignar**,tablas con el listado de establecimientos que no poseen cuentas activas para la gestión del AEL, listados de los establecimientos que deberían ser priorizados para mejorar la gestión y eficiencia del proceso **Anótate en la lista** debido a altas listas de espera o una gran cantidad de días sin gestión de vacantes sin asignar.
 
@@ -284,7 +284,7 @@ Actualmente, todos los establecimientos del SLEP cuentan con al menos un usuario
 En su SLEP actualmente hay un total de **`r params$n_ee_atrasados` establecimientos atrasados**, los que representan un total de **`r params$vas` vacantes sin asignar**.
 :::
 
-En la siguiente Figura se aprecia la distribución de los **26 SLEP** en régimen al 2025, donde el círculo de color diferente es la ubicación de su SLEP según la **tasa de cumplimiento** (eje horizontal) y las vacantes sin asignar (VAS, eje vertical)
+En la siguiente Figura se aprecia la distribución de los **36 SLEP** en régimen al 2026, donde el círculo de color diferente es la ubicación de su SLEP según la **tasa de cumplimiento** (eje horizontal) y las vacantes sin asignar (VAS, eje vertical)
 
 ```{r fig_scatter}
 #| echo: false
@@ -346,9 +346,14 @@ if ( nrow(listado_ael_rbd) == 0){
 Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pendientes.
 :::"
 ))
-} else{
+} else if( nrow(listado_ael_rbd) == 1){
 
-  
+  knitr::asis_output(paste0("
+::: {.callout-warning title: \"Existe un establecimiento con vacantes pendientes de asignar\"}
+Actualmente, existe solo un establecimiento con vacantes pendientes de asignar.
+:::"
+))
+} else{
    colnames(listado_ael_rbd) <- c( "Comuna", "RBD", "Establecimiento", "Vacantes sin Asignar", "Niveles Atrasados", "Niveles Ofrecidos", "Promedio días sin movimiento en AEL" )
 
 mediana_vas <- listado_ael_rbd %>%
@@ -394,7 +399,7 @@ listado_ael_rbd %>%
 
 ## Comportamiento Histórico
 
-En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de Enero a Octubre 2025 para cada comuna del territorio, los datos se obtuvieron con una frecuencia semanal, actualizando el visor todos los lunes del año.
+En esta sección se presenta el comportamiento de las vacantes sin asignar (VAS) durante el periodo de 29 de diciembre hasta el 05 de enero para cada comuna del territorio, los datos se obtuvieron con una frecuencia semanal, y se **actualizarán con una frecuencia semanal**.
 
 ::: callout-warning
 # Antecedentes de fiscalización
@@ -433,7 +438,7 @@ temp_2 %>%
     panel.grid = element_blank()
   ) +
 labs(
-    title = "Vacantes sin asignar durante el 2025, por comuna y día",
+    title = "Vacantes sin asignar durante el 2026, por comuna y día",
     subtitle = "Datos semanales",
     x = NULL,
     y = "Vacantes sin Asignar (VAS)"
@@ -501,7 +506,7 @@ temp3 %>%
              locations = cells_body(rows = n_filas)
     ) %>% 
   cols_align(align = "center", columns = c(2, 3, 4)) %>%
-  tab_footnote(footnote = "Fuente: Visor Anótate en la lista, 2025.") %>%
+  tab_footnote(footnote = "Fuente: Visor Anótate en la lista, 2026.") %>%
   cols_width(colnames(temp_3)[2] ~ px(90),
              colnames(temp_3)[3] ~ px(90),
              colnames(temp_3)[4] ~ px(80))
