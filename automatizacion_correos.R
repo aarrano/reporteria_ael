@@ -5,7 +5,7 @@
 
 # 1. LIBRERIAS ----
 rm(list=ls())
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse,openxlsx,readxl)
 
 
 # 2. POWERSHELL ----
@@ -43,10 +43,16 @@ df <- df %>%
     slep   = ifelse(is.na(slep), "Sin Nombre", trimws(slep)),
     nom_archivo = trimws(archivo) # Elimina espacios al inicio o final
   ) %>% 
-  mutate(archivo=paste0(path_archivo,nom_archivo))
+  mutate(archivo=paste0(path_archivo,nom_archivo)) %>% 
+  mutate(saludo = case_when(
+    genero == "F" ~ "Estimada ",
+    genero == "M" ~ "Estimado "
+  ))
 
+# Correos nuevos ----
 df <- df %>% 
-  filter(!slep %in% c("Chiloé","Santa Rosa","Punilla Cordillera","Aysen","Chinchorro","Elqui"))
+  filter(slep == "Petorca")
+
 
 # Estructura esperada:
 # - empresa: Nombre de la empresa
@@ -105,15 +111,18 @@ for (i in 1:nrow(df)) {
   copia_cli <- df$copia[i]
   empresa_cli <- df$slep[i]
   archivo     <- df$archivo[i]
+  saludo_cli <- df$saludo[i]
   
   asunto_msg <- paste("Reporte Semanal AEL -", empresa_cli)
   cuerpo_msg <- paste0(
-    "Estimado/a ", nombre_cli, ",\n\n",
+    saludo_cli, nombre_cli, ",\n\n",
     "Junto con saludar y desearles un feliz año, les escribo para compartir la actualización del estado del 'Anótate en la lista' al 05 de enero para el SLEP ", empresa_cli, ".\n\n",
-    "En el archivo podrán encontrar los datos de su respectivo territorio, con los que les sugerimos se centren en aquellos establecimientos sin cuentas activas y con lista de espera.\n\n",
-    "Adicionalmente, priorizar aquellos establecimientos con una alta cantidad de Vacantes Sin Asignar (dado que es una forma de aumentar la matrícula en algunos EE).\n\n",
+    "En el archivo podrán encontrar los datos sobre listas de espera, establecimientos sin cuentas activas y otros, por lo que les sugerimos se centren en aquellos establecimientos sin cuentas activas y con lista de espera.\n\n",
+    "Adicionalmente, priorizar el contacto con aquellos establecimientos con una alta cantidad de Vacantes Sin Asignar (dado que es una forma de aumentar la matrícula en algunos EE).\n\n",
+    "Veremos este instrumento en mayor detalle en la reunión del Martes 13 de Enero, donde tendremos la inducción sobre el Sistema de Admisión Escolar y las labores asociadas.\n\n",
     "Saludos cordiales.\n\n",
-    "PD: Este es un correo generado automáticamente, favor reportar cualquier incidencia con el envío de información."
+    "PD: Este es un correo generado automáticamente, favor reportar cualquier incidencia con el envío de información.\n\n",
+    "PD 2: El archivo debe ser descargado y visualizado desde un navegador, no es compatible con la vista desde el telefóno .\n\n"
   )
   # Validacion que existe el archivo
   if (!file.exists(archivo)) {
