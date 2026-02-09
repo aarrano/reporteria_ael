@@ -8,7 +8,7 @@
 #Sobretodo pensado que el visor de powerbi tuvo su auge de uso durante los primeros 
 # 4 meses del año. Así, logramos instalar un proceso clave en la UATP. 
 
-#Contexto: Originalmente habia un seguimiento semanal que se hacia con una minuta y datos manuales.
+#Contexto: Originalmente había un seguimiento semanal que se hacia con una minuta y datos manuales.
 #Por falta de prioridad el proceso nunca se llevó a cabo, hasta ahora, que hay más tiempo disponible.
 rm(list=ls())
 
@@ -140,7 +140,8 @@ temp_ael <- ael_t %>%
 
 # LOOP por SLEP ----
 #pilotaje = c(6,7,10,11,15,22,24)
-
+i=1
+total = length(nombre_sleps)
 for (s in nombre_sleps) {
   
   "Hacemos el print de qué SLEP se está generando"
@@ -196,11 +197,11 @@ for (s in nombre_sleps) {
       ael_actual = ael_actual
     ),
     quiet = F,
-    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260105/"),
+    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260209/"),
   )
-  
-  message("Reportes creados")
-  
+
+  message(paste0(i, " de ",total," reportes creados."))
+  i=i+1
   #Fin del loop
 }
 

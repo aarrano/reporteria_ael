@@ -181,7 +181,7 @@ Vacantes sin asignar
 
 ::::: {.valuebox .red}
 ::: caption
-Establecimientos sin cuenta activa
+Establecimientos sin cuenta activa (al 02 de febrero)
 :::
 
 ::: value
@@ -206,7 +206,7 @@ if (aux_cuentas != 0) {
   porcentaje <- round(params$n_ee_sin_cuenta * 100 / params$n_ee, 1)
   
   knitr::asis_output(paste0("
-::: {.callout-important title=\"Alerta de establecimientos sin cuentas activas\"}
+::: {.callout-important title=\"Alerta de establecimientos sin cuentas activas al 02 de febrero de 2026.\"}
 En su SLEP actualmente un **", porcentaje, "%** de sus establecimientos no poseen ninguna cuenta activa (Director/Encargado SAE).
 :::
 "))
@@ -250,10 +250,11 @@ Actualmente, todos los establecimientos del SLEP cuentan con al menos un usuario
       use_highlight = TRUE,
       use_compact_mode = TRUE,
       use_text_wrapping = FALSE,
-      use_page_size_select = TRUE
+      use_page_size_select = TRUE,
+      page_size_default = 40
     ) %>% tab_header(
       title = md(
-        "**Listado de EE sin cuentas activas** (Ni director Ni encargado SAE)"
+        "**Listado de EE sin cuentas activas** (Ni director Ni encargado SAE) al 02 de febrero."
       ),
       subtitle = "Ordenado según Lista de Espera"
     ) %>%
@@ -545,7 +546,8 @@ listado_ael_rbd %>%
       use_highlight = TRUE,
       use_compact_mode = TRUE,
       use_text_wrapping = FALSE,
-      use_page_size_select = TRUE
+      use_page_size_select = TRUE,
+      page_size_default = 40
     ) %>% 
     tab_header(
       title = md("**Estado actual del AEL por Establecimiento**"),

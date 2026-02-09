@@ -1,0 +1,187 @@
+---
+title: "AUTOMATIZACIÓN DE CORREOS OUTLOOK - INSTRUCCIONES"
+format: html
+---
+
+## 📁 Estructura de Archivos
+
+```
+proyecto/
+├── automatizacion_correos.R    # Script principal
+├── templates_correos.R         # Templates HTML (AQUÍ SE EDITAN LOS MENSAJES)
+└── correos/
+    └── correos_FINAL.xlsx      # Datos de destinatarios
+```
+
+## 🚀 Cómo Usar
+
+### 1. Ejecutar el Script Principal
+
+Simplemente corre `automatizacion_correos.R`. Este script:
+- Carga automáticamente los templates desde `templates_correos.R`
+- Lee los destinatarios del Excel
+- Envía los correos con formato HTML
+
+### 2. Editar Mensajes
+
+**IMPORTANTE**: Para cambiar el contenido o estilo de los correos, 
+edita el archivo `templates_correos.R`, NO el script principal.
+
+En `templates_correos.R` encontrarás:
+- La función `generar_html_reporte_semanal()` con todo el HTML
+- Los estilos CSS dentro de la etiqueta `<style>`
+- El contenido del mensaje
+
+## 📝 Personalización Rápida
+
+### Cambiar el texto del mensaje
+
+Busca en `templates_correos.R` la sección que dice:
+
+```
+<p class="parrafo">
+  Junto con saludar, y esperando se encuentre bien...
+</p>
+```
+Y modifica el texto entre las etiquetas `<p>` y `</p>`.
+
+### Cambiar colores
+
+En la sección `<style>`, modifica:
+
+```css
+.destacado {
+  text-decoration: underline;
+  font-weight: bold;
+  color: #0078D4;  /* ← Cambia este color */
+}
+```
+
+### Cambiar fuente o tamaño
+
+```css
+body {
+  font-family: Calibri, Arial, sans-serif;  /* ← Cambia la fuente */
+  font-size: 11pt;  /* ← Cambia el tamaño */
+}
+```
+
+## 🎨 Estilos CSS Disponibles
+
+Las clases CSS que puedes usar en el HTML:
+
+- `.saludo` - Para el saludo inicial
+- `.parrafo` - Párrafos normales con justificado
+- `.destacado` - Texto subrayado y en negrita
+- `.negrita` - Solo negrita
+- `.firma` - Bloque de firma al final
+- `.nota` - Cuadro de nota con fondo gris y borde azul
+
+### Ejemplo de uso en el HTML:
+
+```html
+<p class="parrafo">
+  Este es un párrafo normal con <span class="negrita">texto en negrita</span>
+  y también <span class="destacado">texto destacado</span>.
+</p>
+```
+
+## ➕ Agregar Nuevos Templates
+
+Si necesitas crear un nuevo tipo de correo (ej: recordatorios, notificaciones):
+
+1. En `templates_correos.R`, agrega una nueva función:
+
+```r
+generar_html_recordatorio <- function(saludo, nombre, fecha_limite) {
+  html <- paste0('
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        /* tus estilos aquí */
+      </style>
+    </head>
+    <body>
+      <p>', saludo, ' ', nombre, ',</p>
+      <p>Le recordamos que la fecha límite es: ', fecha_limite, '</p>
+    </body>
+  </html>
+  ')
+  return(html)
+}
+```
+
+2. En `automatizacion_correos.R`, usa el nuevo template:
+
+```r
+cuerpo_html <- generar_html_recordatorio(
+  saludo = saludo_cli,
+  nombre = nombre_cli,
+  fecha_limite = "23 de enero"
+)
+```
+
+## ⚠️ Solución de Problemas
+
+### El correo se ve sin formato
+
+Verifica que en `automatizacion_correos.R` esté usando `$Mail.HTMLBody` 
+y NO `$Mail.Body`.
+
+### Caracteres especiales se ven mal
+
+Asegúrate de escapar los apóstrofes en el HTML:
+
+- Incorrecto: `'Anótate en la lista'`
+
+- Correcto: `\'Anótate en la lista\'`
+
+### No se encuentra el archivo de templates
+
+El archivo `templates_correos.R` debe estar en la misma carpeta 
+que `automatizacion_correos.R`.
+
+## 📋 Colores Útiles
+
+```{r}
+# Azules
+#0078D4  # Azul Microsoft
+#003366  # Azul oscuro
+#E8F4F8  # Azul muy claro
+
+# Grises
+#333333  # Gris oscuro (texto)
+#555555  # Gris medio
+#F0F0F0  # Gris muy claro (fondos)
+
+# Otros
+#28A745  # Verde éxito
+#FFC107  # Amarillo advertencia
+#DC3545  # Rojo error
+```
+
+## 🔧 Testing
+
+Para probar sin enviar muchos correos:
+
+```r
+df <- df[1,]  # Solo primera fila
+```
+
+Para ver cómo se ve el HTML antes de enviar:
+
+```r
+writeLines(cuerpo_html, "preview.html")
+shell.exec("preview.html")  # Abre en navegador
+```
+
+## 📞 Soporte
+
+Para cambios en:
+
+- **Contenido del mensaje** → Edita `templates_correos.R`
+
+- **Destinatarios** → Edita el Excel
+
+- **Lógica de envío** → Edita `automatizacion_correos.R`
