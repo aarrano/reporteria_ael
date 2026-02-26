@@ -63,7 +63,7 @@ generar_html_reporte_semanal <- function(saludo, nombre, empresa) {
       <p class="parrafo">
         Junto con saludar, y esperando se encuentre bien, comparto con usted 
         <span class="destacado">la actualización del estado del \'Anótate en la lista\' 
-        al 09 de febrero </span> para el SLEP ', empresa, '.
+        al 16 de febrero </span> para el SLEP ', empresa, '.
       </p>
       
       <p class="parrafo">
@@ -72,18 +72,17 @@ generar_html_reporte_semanal <- function(saludo, nombre, empresa) {
       </p>
       
       <p class="parrafo">
-        Entendemos que en este momento la mayoría de los equipos directivos de los establecimientos se encuentran de vacaciones,
-        pero compartimos igualmente la información dado que las listas de espera siguen aumentando y así puedan generar las alertas
-        necesarias cuando corresponda.
+        Entendemos que en este momento los equipos directivos de los establecimientos se encuentran de vacaciones y/o recién retomando sus actividades,
+        por lo que compartimos esta información para resguardar la oportuna gestión de las listas de espera.
       </p>
       
       <p class="parrafo">
-        <span class="negrita"> La información de cuentas activas corresponde al Lunes 02 de febrero</span>, 
+        <span class="negrita"> La información de cuentas activas corresponde al Miércoles 11 de febrero</span>, 
         última información a la que la DEP tuvo acceso, por lo que es probable que los listados pueden estar desactualizados.
       </p>
       
       <p class="parrafo">
-        En este periodo de traspaso, seguiré enviándoles estos reportes, por lo que pueden escribirle a Gabriela con copia a mí para cualquier ayuda que necesiten.<br>
+        En este periodo de traspaso, seguiré enviándoles estos reportes, por lo que pueden escribirle a Gabriela Campos (gabriela.campos@dep.cl) y a la jefatura del subdepartamento Javiera Martinez (javiera.martinez@dep.cl) .<br>
         <br>
         Saludos cordiales.
       </p>

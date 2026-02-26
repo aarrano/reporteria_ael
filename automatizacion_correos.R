@@ -26,7 +26,7 @@ cat("✓ PowerShell disponible\n\n")
 
 # 4. LEER DATOS DEL EXCEL ----
 
-fecha_archivo <- "260209/"
+fecha_archivo <- "260216/"
 
 # Ruta del archivo Excel
 ruta_excel <- "./correos/correos_FINAL.xlsx"

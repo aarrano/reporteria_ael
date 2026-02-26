@@ -30,7 +30,7 @@ files <- list.files(link_1,full.names = TRUE,pattern = ".csv")
 
 ael_t <- fread(files[length(files)-1])
 
-message(paste("Leyendo el archivo",files[length(files)-1],"como archivo actual"))
+message(paste("\nLeyendo el archivo",files[length(files)-1],"como archivo actual"))
 
 #Acceso al estado de cuentas 
 link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/data/Cuentas/cuentas_activas.xlsx"
@@ -52,7 +52,7 @@ df_cuentas <- df_cuentas%>%
 if (year_actual != "2026") {
   stop("❌ Debes actualizar el código para que la generación de reportes incluya a los SLEP que están en su primer año de instalación.")
 } else {
-  message("✅ El código se encuentra actualizado para los SLEP en régimen.")
+  message("\n✅ El código se encuentra actualizado para los SLEP en régimen.")
 }
 
 # SLEP en régimen
@@ -197,7 +197,7 @@ for (s in nombre_sleps) {
       ael_actual = ael_actual
     ),
     quiet = F,
-    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260209/"),
+    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260223/"),
   )
 
   message(paste0(i, " de ",total," reportes creados."))
