@@ -54,15 +54,18 @@ tabla_glosario <- read.xlsx("./inputs_qmd/tabla_glosario.xlsx")
 
 
 # Carga de información ----
+cat("Cargamos datos históricos AEL y EE sin cuentas activas")
 
 df_ael <- fread(link_maestro)
 df_cuentas <- read.xlsx(link_cuentas) %>% clean_names()
+
 df_cuentas <- df_cuentas %>%
   filter(d_inactivo == 0)
 
 ## Trabajando información ----
 
 # Añadimos un recordatorio para que avise el código si nos equivocamos en la cantidad de SLEP
+cat("Chequeando estado de actualización del código...")
 if (year_actual != "2026") {
   stop(
     "❌ Debes actualizar el código para que la generación de reportes incluya a los SLEP que están en su primer año de instalación."
@@ -202,13 +205,18 @@ temp_ael <- ael_t %>%
   ) %>%
   rename(`Vacantes sin asignar` = `total posibles cupos`)
 
+fecha_archivo = format(fecha_ultima_actualización, "%Y%m%d")
 # LOOP por SLEP ----
 #pilotaje = c(6,7,10,11,15,22,24)
 i = 1
 total = length(nombre_sleps)
-for (s in nombre_sleps[3]) {
+for (s in nombre_sleps) {
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
+  
+  data_slep <- ael_t %>% filter(nombre_slep == s)
+  nom_excel =  gsub(" ", "_", s)
+  write.xlsx(data_slep,paste0("./Minuta x SLEP./2026/260302/","AEL_",nom_excel,".xlsx"),asTable = T,overwrite = T)
 
   ## Pasamos los indicadores claves del SLEP ----
   n_ee <- indicadores_1[nombre_sleps == s, 2]
@@ -259,11 +267,45 @@ for (s in nombre_sleps[3]) {
       glosario = tabla_glosario,
       ael_actual = ael_actual
     ),
-    quiet = F,
-    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260223/"),
+    quiet = T,
+    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260302/"),
   )
 
   message(paste0(i, " de ", total, " reportes creados."))
   i = i + 1
   #Fin del loop
 }
+
+# Render para la DDE ----
+
+# indicador_DDE <-  df_ael %>% # Calculamos la info de los ultimos 2 reportes
+#   #filter(fecha_corte_info %in% tail(sort(unique(fecha_corte_info)), 2)) %>% 
+#   summarize(
+#     `Total de EE` = n_distinct(rbd),
+#     `EE atrasados` = n_distinct(rbd[condicion_rbd == 1]),
+#     `Tasa de cumplimiento` = round((`Total de EE` - `EE atrasados`) * 100 / `Total de EE`, 1),
+#     `Promedio dias atrasados` = round(mean(`promedio dias sin movimiento`[condicion_rbd == 1 &
+#                                                                             posibles_cupos > 0]), 1),
+#     `Vacantes sin asignar` = sum(posibles_cupos, na.rm = TRUE),
+#     .by = c("fecha_corte_info","nombre_slep")
+#   ) %>% # Pegamos informacion de los EE sin cuenta activa
+#   left_join(
+#     df_cuentas %>%
+#       summarize(`EE sin cuentas` = n(), .by = nombre_slep),
+#     by = "nombre_slep"
+#   ) %>% #  Calculamos tasa de EE sin cuenta activa
+#   mutate(
+#     `Tasa EE sin cuenta` = coalesce(round(`EE sin cuentas` * 100 / `Total de EE`, 1), 0)
+#   )
+
+# indicador_DEP <- indicador_DDE %>%
+#   summarize(
+#     `Total de EE` = sum(`Total de EE`),
+#     `Total EE atrasados` = sum(`EE atrasados`),
+#     `Tasa de cumplimiento` =  round((`Total de EE` - `Total EE atrasados`) * 100 / `Total de EE`, 1),
+#     `Promedio dias atrasados` = round(mean(`Promedio dias atrasados`), 0),
+#     `Vacantes sin asignar` = sum(`Vacantes sin asignar`, na.rm = TRUE),
+#     `EE sin cuentas` = sum(`EE sin cuentas`, na.rm = TRUE),
+#     .by = fecha_corte_info
+#   )
+# #fecha_ultima_actualización transformar en parametro 

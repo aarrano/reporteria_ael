@@ -1,0 +1,129 @@
+---
+title: "Reporte Anótate en la Lista (AEL) 2026 \\newline \\Large Estado de avance al `r params$fecha`"
+author: "Subepartamento de Instalación y Gestión Educativa"
+date: "`r format(Sys.Date(), '%B %Y')`"
+lang: es
+format:
+  pdf:
+    latex-auto-install: false
+    pdf-engine: xelatex
+    keep-tex: false
+    number-sections: true
+fontsize: 12pt
+geometry:
+  - top=1.5cm
+  - bottom=3cm
+  - left=3cm
+  - right=3cm
+  - headsep=0cm
+  - footskip=0.5cm
+mainfont: Calibri Light
+sansfont: Calibri Light
+colorlinks: true
+linkcolor: black
+urlcolor: colorDEP
+params:
+  slep: nombre_slep
+  glosario: null
+  n_ee: null
+  n_ee_atrasados: null
+  n_ee_sin_cuenta: null
+  tasa_cumplimiento: null
+  dias_sin_mov: null
+  listado_cuentas: null
+  vas: null
+  data_fig_1: null
+  graf_lineas: null
+  ael_actual: null
+header-includes:
+  - \renewcommand{\contentsname}{Tabla de contenidos}
+  - \renewcommand{\tablename}{Tabla}
+  - \usepackage{array}
+  - \usepackage{booktabs}
+  - \usepackage{caption}
+  - \usepackage{titlesec}
+  - \usepackage{titling}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{longtable}
+  - \usepackage{multirow}
+  - \usepackage{tabularray}
+  - \usepackage{pdflscape}
+  - \usepackage{tabularx}
+  - \usepackage{xcolor}
+  - \usepackage[most]{tcolorbox}
+  - \pretitle{\begin{center}\LARGE\sffamily\color{titulo}}
+  - \posttitle{\par\vspace{-0.8em}\end{center}}
+  - \preauthor{\begin{center}\small\sffamily}
+  - \postauthor{\par\vspace{-0.6em}\end{center}}
+  - \predate{\begin{center}\footnotesize\sffamily}
+  - \postdate{\par\end{center}}
+  - \usepackage{fancyhdr}
+  - \def\logopath{DEP_grafica_color.png}
+  - \pagestyle{fancy}
+  - \definecolor{titulo}{HTML}{0F4761}
+  - \definecolor{colorDEP}{HTML}{0f69b4}
+  - \definecolor{colorAlerta}{HTML}{C75000}
+  - \definecolor{colorRojo}{HTML}{A61C00}
+  - \setlength{\headheight}{65pt}
+  - \setlength{\droptitle}{-1em}
+  - \fancyhf{}
+  - \fancyhead[R]{\raisebox{0.45cm}{\includegraphics[height=2cm]{\logopath}}}
+  - \addtolength{\headwidth}{2cm}
+  - \fancyheadoffset[R]{2cm}
+  - \renewcommand{\headrulewidth}{0pt}
+  - \fancyfoot[R]{\color{colorDEP}\textbf{\thepage}}
+  - \fancyfootoffset[R]{1cm}
+  - \titleformat{\section}{\color{titulo}\normalfont\Large\bfseries\sffamily}{\thesection}{1em}{}
+  - \titleformat{\subsection}{\color{titulo}\normalfont\large\bfseries\sffamily}{\thesubsection}{1em}{}
+  - \titleformat{\subsubsection}{\color{titulo}\normalfont\normalsize\bfseries\sffamily}{\thesubsubsection}{1em}{}
+  - \makeatletter
+  - \let\ps@plain\ps@fancy
+  - \makeatother
+---
+
+```{r}
+#| label: Paquetes
+#| include: false
+
+Sys.setlocale("LC_TIME", "es_ES.UTF-8")
+pacman::p_load(
+    tidyverse,
+    data.table,
+    openxlsx,
+    janitor,
+    kableExtra,
+    fontawesome,
+    ggrepel
+)
+```
+
+```{r config_tablas}
+#| message: false
+#| echo: false
+
+#Ajustes y preparación de BD
+options(kableExtra.latex.load_packages = FALSE)
+require(kableExtra)
+options(knitr.table.format = "latex")
+options(knitr.kable.NA = '-')
+```
+
+# Estado de las vacantes sin asignar.
+
+El subdepartamento de instalación y gestión educativa realiza un monitoreo semanal del estado de las vacantes sin asignar en los establecimientos de los 36 SLEP en régimen, enviando un reporte puntualizado con la situación para cada SLEP. A continuación se presentan los datos principales del proceso y su variación con respecto a la medición anterior.
+
+>Nota: En esta sección se presentará el avance respecto a la cantidad de EE atrasados, Vacantes sin asignar y el promedio de días sin movimiento. SIEMPRE COMPARANDO CON EL REPORTE ANTERIOR
+
+## Evolución de las vacantes sin asignar.
+
+A continuación se presenta la evolución de las vacantes sin asignar en los establecimientos dependendientes de los 36 SLEP en régimen.
+
+## Distribución de las vacantes sin asignar
+
+El comportamiento de las vacantes sin asignar, siempre es heterogéneo. A continuación se presenta la distribución de los SLEP según su estado de variación con respecto al reporte anterior. Así `x de los 36 SLEP` presentaron aumentos en la cantidad de vacantes sin asignar. El top 3 de SLEP compuesto por `SLEP 1`, `SLEP 2` y `SLEP 3` componen el `x% de las VSA`. Mientras que el 50% de las `VSA` se concentra en `X cantidad de SLEP`.
+
+>Insertar figura que muestre si la mayoría aumenta, disminuye o se mantiene.
+
+## Vacantes sin asignar por SLEP.
+

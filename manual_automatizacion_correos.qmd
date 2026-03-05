@@ -185,3 +185,5 @@ Para cambios en:
 - **Destinatarios** → Edita el Excel
 
 - **Lógica de envío** → Edita `automatizacion_correos.R`
+
+Para cualquier duda o problema, contacta a Alonso Arraño a través de `alonso.arrano@dep.cl`
