@@ -47,7 +47,7 @@ message(paste(
 ))
 
 #Acceso al estado de cuentas
-link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/data/Cuentas/cuentas_activas.xlsx"
+link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/data/cuentas/cuentas_activas.xlsx"
 
 #Cargamos tabla con definiciones para el glosario
 tabla_glosario <- read.xlsx("./inputs_qmd/tabla_glosario.xlsx")
@@ -216,7 +216,7 @@ for (s in nombre_sleps) {
   
   data_slep <- ael_t %>% filter(nombre_slep == s)
   nom_excel =  gsub(" ", "_", s)
-  write.xlsx(data_slep,paste0("./Minuta x SLEP./2026/260302/","AEL_",nom_excel,".xlsx"),asTable = T,overwrite = T)
+  write.xlsx(data_slep,paste0("./Minuta x SLEP./2026/260309/","AEL_",nom_excel,".xlsx"),asTable = T,overwrite = T)
 
   ## Pasamos los indicadores claves del SLEP ----
   n_ee <- indicadores_1[nombre_sleps == s, 2]
@@ -267,8 +267,8 @@ for (s in nombre_sleps) {
       glosario = tabla_glosario,
       ael_actual = ael_actual
     ),
-    quiet = T,
-    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260302/"),
+    quiet = F,
+    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260309/"),
   )
 
   message(paste0(i, " de ", total, " reportes creados."))
