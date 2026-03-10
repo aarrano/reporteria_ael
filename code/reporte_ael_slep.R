@@ -23,8 +23,7 @@ pacman::p_load(
   gt,
   fontawesome,
   knitr,
-  quarto,
-  ggrepel
+  quarto
 )
 
 year_actual <- year(today())
