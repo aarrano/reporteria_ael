@@ -97,8 +97,26 @@ pacman::p_load(
     janitor,
     kableExtra,
     fontawesome,
-    ggrepel
+    ggrepel,
+    extrafont
 )
+loadfonts(device = "win")
+
+## Funciones:
+tema_cem <- function() {
+  theme(
+    axis.text.y = element_text( size = 8, color = "black" ),# family = "Calibri Light"),
+    axis.text.x = element_text( size = 8, color = "black") ,# family = "Calibri Light"), 
+    axis.text = element_text(size=10, color = "black") , # family = "Calibri Light"),
+    #axis.title = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.2),
+    #plot.background = element_rect(fill = NA, color = "black", size = 0.75),
+    panel.background = element_rect(fill = "white"),
+    panel.grid = element_blank(),
+    legend.text = element_text(size = 10, color = "black", family = "Calibri Light"), 
+    legend.title = element_text(size=10, color = "black", family = "Calibri Light")
+  )
+}
 ```
 
 ```{r config_tablas}
@@ -372,21 +390,25 @@ max_fig_1 <- ceiling(max(datos_fig_1$Vacantes.sin.asignar) / 50) * 50
 
 datos_fig_1 %>%
     mutate(
-        nombre_slep = if_else(nombre_slep == params$slep, nombre_slep, "")
+        nombre_slep = if_else(nombre_slep == params$slep, nombre_slep, ""),
+        es_slep = if_else(nombre_slep == params$slep, "destacado", "otro")
     ) %>%
+  arrange(es_slep) %>% 
     ggplot(aes(
         x = Tasa.de.cumplimiento,
         y = Vacantes.sin.asignar,
-        fill = nombre_slep
+        color = es_slep,
+        fill = es_slep
     )) +
-    geom_point(
-        aes(color = nombre_slep, fill = nombre_slep),
-        size = 4,
-        alpha = 0.5,
-        shape = 21,
-        show.legend = FALSE
-    ) +
-    theme_minimal() +
+  geom_point(
+    size = 4,
+    alpha = 0.5,
+    shape = 21,
+    show.legend = FALSE
+  ) +
+  scale_color_manual(values = c("destacado" = "#E63946", "otro" = "grey70")) +
+  scale_fill_manual(values  = c("destacado" = "#E63946", "otro" = "grey70"))+
+    tema_cem()+
     geom_text_repel(
         aes(label = nombre_slep),
         color = "black",
@@ -397,17 +419,19 @@ datos_fig_1 %>%
         max.overlaps = 1000,
         seed = 7654
     ) +
-    scale_x_continuous(n.breaks = 6) +
-    scale_y_continuous(
-        limits = c(0, max_fig_1),
-        breaks = seq(0, max_fig_1, length.out = 6),
-        expand = c(0.03, 0.04)
-    ) +
-    labs(
-        x = "Tasa de cumplimiento(%)",
-        y = "Total Vacantes sin asignar",
-        title = "Distribución de los SLEP según % de cumplimiento y VSA"
-    )
+scale_x_continuous(
+    limits = c(0, 100),
+    breaks = seq(0, 100, by = 20),
+    labels = paste0(seq(0, 100, by = 20), "%")
+) +
+scale_y_continuous(
+    limits = c(0, max_fig_1),
+    breaks = seq(0, max_fig_1, by = max_fig_1 / 5),
+    labels = round(seq(0, max_fig_1, by = max_fig_1 / 5))
+) +
+labs(x = "Tasa de cumplimiento(%)",
+     y = "Total Vacantes sin asignar",
+     title = "Distribución de los SLEP según % de cumplimiento y VSA")
 ```
 <!-- \newpage -->
 <!-- ## Distribución de los establecimientos atrasados -->

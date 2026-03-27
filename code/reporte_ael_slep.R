@@ -22,11 +22,18 @@ pacman::p_load(
   janitor,
   gt,
   fontawesome,
+  extrafont,
   knitr,
   quarto
 )
 
 year_actual <- year(today())
+
+loadfonts(device = "win", quiet = TRUE)
+## Creacion carpetas
+fecha_hoy <- format(Sys.Date(), "%y%m%d")  # "260316"
+carpeta <- paste0("./Minuta x SLEP/2026/", fecha_hoy, "/")
+if (!dir.exists(carpeta)) dir.create(carpeta, recursive = TRUE)
 
 ## Pathways ---
 
@@ -207,15 +214,16 @@ temp_ael <- ael_t %>%
 fecha_archivo = format(fecha_ultima_actualización, "%Y%m%d")
 # LOOP por SLEP ----
 #pilotaje = c(6,7,10,11,15,22,24)
+output_dir <- paste0("../Minuta x SLEP/2026/", fecha_hoy, "/")
 i = 1
 total = length(nombre_sleps)
-for (s in nombre_sleps) {
+for (s in nombre_sleps[34:36]) {
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
   
   data_slep <- ael_t %>% filter(nombre_slep == s)
   nom_excel =  gsub(" ", "_", s)
-  write.xlsx(data_slep,paste0("./Minuta x SLEP./2026/260309/","AEL_",nom_excel,".xlsx"),asTable = T,overwrite = T)
+  write.xlsx(data_slep,paste0("./Minuta x SLEP./2026/",fecha_hoy,"/",fecha_archivo,"_AEL_",nom_excel,".xlsx"),asTable = T,overwrite = T)
 
   ## Pasamos los indicadores claves del SLEP ----
   n_ee <- indicadores_1[nombre_sleps == s, 2]
@@ -251,7 +259,7 @@ for (s in nombre_sleps) {
     input = "./code/reporteria_ael_slep_pdf_v3.qmd",
     execute_dir = getwd(),
     output_format = "pdf",
-    output_file = paste0("reporte_", gsub(" ", "_", s), ".pdf"),
+    output_file = paste0(fecha_archivo,"_reporte_", gsub(" ", "_", s), ".pdf"),
     execute_params = list(
       slep = nombre,
       n_ee = n_ee,
@@ -267,7 +275,7 @@ for (s in nombre_sleps) {
       ael_actual = ael_actual
     ),
     quiet = F,
-    quarto_args = c("--output-dir", "../Minuta x SLEP./2026/260309/"),
+    quarto_args = c("--output-dir", output_dir),
   )
 
   message(paste0(i, " de ", total, " reportes creados."))
