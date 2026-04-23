@@ -15,12 +15,15 @@ rm(list = ls())
 # Proyecto ----
 message("Inicio proceso creación de reportes AEL para SLEP")
 
-library(tidyverse)
-library(openxlsx)
-library(janitor)
-library(extrafont)
-library(knitr)
-library(quarto)
+pacman::p_load(
+  tidyverse,
+  data.table,
+  openxlsx,
+  janitor,
+  extrafont,
+  knitr,
+  quarto
+)
 
 year_actual <- year(today())
 year_esperado <- 2026L
@@ -40,7 +43,7 @@ link_maestro <- paste0("D:/Alonso.Arrano/OneDrive - Dirección de Educación Pú
 link_1 <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/output/"
 files <- list.files(link_1, full.names = TRUE, pattern = ".csv")
 
-ael_t <- read_csv(files[length(files) - 1], col_types = cols(rbd = col_character(), .default = col_guess()), show_col_types = FALSE)
+ael_t <- fread(files[length(files) - 1])
 
 message(paste(
   "\nLeyendo el archivo",
@@ -58,7 +61,7 @@ tabla_glosario <- read.xlsx("./inputs_qmd/tabla_glosario.xlsx")
 # Carga de información ----
 cat("Cargamos datos históricos AEL y EE sin cuentas activas")
 
-df_ael <- read_csv(link_maestro, col_types = cols(rbd = col_character(), .default = col_guess()), show_col_types = FALSE)
+df_ael <- fread(link_maestro)
 df_cuentas <- read.xlsx(link_cuentas) %>% clean_names()
 
 df_cuentas <- df_cuentas %>%

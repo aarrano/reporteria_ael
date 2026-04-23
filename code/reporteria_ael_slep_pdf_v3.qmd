@@ -92,11 +92,13 @@ header-includes:
 #| include: false
 
 Sys.setlocale("LC_TIME", "es_ES.UTF-8")
-library(tidyverse)
-library(janitor)
-library(kableExtra)
-library(ggrepel)
-library(extrafont)
+pacman::p_load(
+    tidyverse,
+    janitor,
+    kableExtra,
+    ggrepel,
+    extrafont
+)
 loadfonts(device = "win", quiet = TRUE)
 
 ## Funciones:
