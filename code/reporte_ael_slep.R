@@ -220,7 +220,7 @@ fecha_archivo = format(fecha_ultima_actualización, "%Y%m%d")
 output_dir <- paste0("../Minuta x SLEP/2026/", fecha_hoy, "/")
 i = 1
 total = length(nombre_sleps)
-for (s in nombre_sleps) {
+for (s in nombre_sleps[11]) {
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
   
