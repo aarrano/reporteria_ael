@@ -15,36 +15,32 @@ rm(list = ls())
 # Proyecto ----
 message("Inicio proceso creación de reportes AEL para SLEP")
 
-pacman::p_load(
-  tidyverse,
-  data.table,
-  openxlsx,
-  janitor,
-  gt,
-  fontawesome,
-  extrafont,
-  knitr,
-  quarto
-)
+library(tidyverse)
+library(openxlsx)
+library(janitor)
+library(extrafont)
+library(knitr)
+library(quarto)
 
 year_actual <- year(today())
+year_esperado <- 2026L
 
 loadfonts(device = "win", quiet = TRUE)
 ## Creacion carpetas
 fecha_hoy <- format(Sys.Date(), "%y%m%d")  # "260316"
-carpeta <- paste0("./Minuta x SLEP/2026/", fecha_hoy, "/")
+carpeta <- paste0("./Minuta x SLEP/", year_actual, "/", fecha_hoy, "/")
 if (!dir.exists(carpeta)) dir.create(carpeta, recursive = TRUE)
 
 ## Pathways ---
 
 #Acceso al maestro del AEL
-link_maestro <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/output/maestro/df_maestro_ael_2026.csv"
+link_maestro <- paste0("D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/output/maestro/df_maestro_ael_", year_actual, ".csv")
 
 #Acceso al ultimo AEL
 link_1 <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/output/"
 files <- list.files(link_1, full.names = TRUE, pattern = ".csv")
 
-ael_t <- fread(files[length(files) - 1])
+ael_t <- read_csv(files[length(files) - 1], col_types = cols(rbd = col_character(), .default = col_guess()), show_col_types = FALSE)
 
 message(paste(
   "\nLeyendo el archivo",
@@ -62,7 +58,7 @@ tabla_glosario <- read.xlsx("./inputs_qmd/tabla_glosario.xlsx")
 # Carga de información ----
 cat("Cargamos datos históricos AEL y EE sin cuentas activas")
 
-df_ael <- fread(link_maestro)
+df_ael <- read_csv(link_maestro, col_types = cols(rbd = col_character(), .default = col_guess()), show_col_types = FALSE)
 df_cuentas <- read.xlsx(link_cuentas) %>% clean_names()
 
 df_cuentas <- df_cuentas %>%
@@ -72,7 +68,7 @@ df_cuentas <- df_cuentas %>%
 
 # Añadimos un recordatorio para que avise el código si nos equivocamos en la cantidad de SLEP
 cat("Chequeando estado de actualización del código...")
-if (year_actual != "2026") {
+if (year_actual != year_esperado) {
   stop(
     "❌ Debes actualizar el código para que la generación de reportes incluya a los SLEP que están en su primer año de instalación."
   )
@@ -217,25 +213,27 @@ temp_ael <- ael_t %>%
 fecha_archivo = format(fecha_ultima_actualización, "%Y%m%d")
 # LOOP por SLEP ----
 #pilotaje = c(6,7,10,11,15,22,24)
-output_dir <- paste0("../Minuta x SLEP/2026/", fecha_hoy, "/")
-i = 1
-total = length(nombre_sleps)
-for (s in nombre_sleps[11]) {
+output_dir <- paste0("../Minuta x SLEP/", year_actual, "/", fecha_hoy, "/")
+i <- 1
+total <- length(nombre_sleps)
+sleps_fallidos <- character(0)
+for (s in nombre_sleps) {
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
-  
+
   data_slep <- ael_t %>% filter(nombre_slep == s)
-  nom_excel =  gsub(" ", "_", s)
-  write.xlsx(data_slep,paste0("./Minuta x SLEP./2026/",fecha_hoy,"/","AEL_",nom_excel,".xlsx"),asTable = T,overwrite = T)
+  nom_excel <- gsub(" ", "_", s)
+  write.xlsx(data_slep, paste0(carpeta, "AEL_", nom_excel, ".xlsx"), asTable = TRUE, overwrite = TRUE)
 
   ## Pasamos los indicadores claves del SLEP ----
-  n_ee <- indicadores_1[nombre_sleps == s, 2]
-  n_ee_atrasados <- indicadores_1[nombre_sleps == s, 3]
-  n_ee_sin_cuenta <- indicadores_1[nombre_sleps == s, 7]
-  tasa_cumplimiento <- indicadores_1[nombre_sleps == s, 4]
-  dias_sin_mov <- indicadores_1[nombre_sleps == s, 5]
-  vas <- indicadores_1[nombre_sleps == s, 6]
-  nombre = s
+  indicadores_slep <- indicadores_1 %>% filter(nombre_slep == s)
+  n_ee <- indicadores_slep %>% pull(`Total de EE`)
+  n_ee_atrasados <- indicadores_slep %>% pull(`EE atrasados`)
+  n_ee_sin_cuenta <- indicadores_slep %>% pull(`EE sin cuentas`)
+  tasa_cumplimiento <- indicadores_slep %>% pull(`Tasa de cumplimiento`)
+  dias_sin_mov <- indicadores_slep %>% pull(`Promedio dias atrasados`)
+  vas <- indicadores_slep %>% pull(`Vacantes sin asignar`)
+  nombre <- s
 
   ## Pasamos la lista de correos sin AEL ----
   'Para evitar problemas con las tablas vacias se añadió el paso que deja los NA en "" una vez filtrada la tabla '
@@ -257,33 +255,46 @@ for (s in nombre_sleps[11]) {
     select(-nombre_slep)
 
   ## Quarto render ----
+  tryCatch({
+    quarto::quarto_render(
+      input = "./code/reporteria_ael_slep_pdf_v3.qmd",
+      execute_dir = getwd(),
+      output_format = "pdf",
+      output_file = paste0("reporte_", gsub(" ", "_", s), ".pdf"),
+      execute_params = list(
+        slep = nombre,
+        n_ee = n_ee,
+        n_ee_atrasados = n_ee_atrasados,
+        n_ee_sin_cuenta = n_ee_sin_cuenta,
+        tasa_cumplimiento = tasa_cumplimiento,
+        dias_sin_mov = dias_sin_mov,
+        listado_cuentas = df_cuentas_slep_qmd,
+        data_fig_1 = indicadores_1,
+        graf_lineas = temp_2,
+        vas = vas,
+        glosario = tabla_glosario,
+        ael_actual = ael_actual,
+        year_actual = year_actual,
+        n_total_sleps = total
+      ),
+      quiet = FALSE,
+      quarto_args = c("--output-dir", output_dir)
+    )
+    message(paste0(i, " de ", total, " reportes creados."))
+  }, error = function(e) {
+    sleps_fallidos <<- c(sleps_fallidos, paste0(s, ": ", conditionMessage(e)))
+    warning(paste("Error en SLEP", s, "-", conditionMessage(e)))
+  })
 
-  quarto::quarto_render(
-    input = "./code/reporteria_ael_slep_pdf_v3.qmd",
-    execute_dir = getwd(),
-    output_format = "pdf",
-    output_file = paste0("reporte_", gsub(" ", "_", s), ".pdf"),
-    execute_params = list(
-      slep = nombre,
-      n_ee = n_ee,
-      n_ee_atrasados = n_ee_atrasados,
-      n_ee_sin_cuenta = n_ee_sin_cuenta,
-      tasa_cumplimiento = tasa_cumplimiento,
-      dias_sin_mov = dias_sin_mov,
-      listado_cuentas = df_cuentas_slep_qmd,
-      data_fig_1 = indicadores_1,
-      graf_lineas = temp_2,
-      vas = vas,
-      glosario = tabla_glosario,
-      ael_actual = ael_actual
-    ),
-    quiet = F,
-    quarto_args = c("--output-dir", output_dir),
-  )
-
-  message(paste0(i, " de ", total, " reportes creados."))
-  i = i + 1
+  i <- i + 1
   #Fin del loop
+}
+
+if (length(sleps_fallidos) > 0) {
+  message("\n⚠️  Los siguientes SLEP fallaron y deben regenerarse manualmente:")
+  purrr::walk(sleps_fallidos, ~ message("  - ", .x))
+} else {
+  message("\n✅ Todos los reportes fueron creados exitosamente.")
 }
 
 # Render para la DDE ----

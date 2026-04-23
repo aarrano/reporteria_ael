@@ -1,5 +1,5 @@
 ---
-title: "Reporte proceso Anótate en la Lista (AEL) 2026 \\newline \\Large SLEP `r params$slep`"
+title: "Reporte proceso Anótate en la Lista (AEL) `r params$year_actual` \\newline \\Large SLEP `r params$slep`"
 author: ""
 date: today
 date-format: "DD-MM-YYYY"
@@ -36,6 +36,8 @@ params:
   data_fig_1: null
   graf_lineas: null
   ael_actual: null
+  year_actual: null
+  n_total_sleps: null
 header-includes:
   - \renewcommand{\contentsname}{Tabla de contenidos}
   - \renewcommand{\tablename}{Tabla}
@@ -90,17 +92,12 @@ header-includes:
 #| include: false
 
 Sys.setlocale("LC_TIME", "es_ES.UTF-8")
-pacman::p_load(
-    tidyverse,
-    data.table,
-    openxlsx,
-    janitor,
-    kableExtra,
-    fontawesome,
-    ggrepel,
-    extrafont
-)
-loadfonts(device = "win")
+library(tidyverse)
+library(janitor)
+library(kableExtra)
+library(ggrepel)
+library(extrafont)
+loadfonts(device = "win", quiet = TRUE)
 
 ## Funciones:
 tema_cem <- function() {
@@ -128,6 +125,18 @@ options(kableExtra.latex.load_packages = FALSE)
 require(kableExtra)
 options(knitr.table.format = "latex")
 options(knitr.kable.NA = '-')
+```
+
+```{r setup_datos}
+#| include: false
+
+glosario <- as_tibble(params$glosario)
+listado_cuentas_table <- as_tibble(params$listado_cuentas)
+datos_fig_1 <- as_tibble(params$data_fig_1)
+graf_lineas <- as_tibble(params$graf_lineas)
+ael_actual <- as_tibble(params$ael_actual)
+year_actual <- params$year_actual
+n_total_sleps <- params$n_total_sleps
 ```
 
 <!-- # Estimadas Subdirecciones UATP y Encargadas/os SAE: -->
@@ -171,9 +180,6 @@ La información disponible en este documento se basa únicamente en los establec
 #| message: false
 #| warning: false
 #| results: "asis"
-
-glosario <- params$glosario
-glosario <- as.data.frame(glosario)
 
 tbl_glosario <- glosario %>%
     kbl(
@@ -283,9 +289,7 @@ if (aux_cuentas != 0) {
 
     knitr::asis_output(paste0(
         "
-::: {.callout-important title=\"Alerta de establecimientos sin cuentas activas",
-        params$fecha_corte,
-        ".\"}
+::: {.callout-important title=\"Alerta de establecimientos sin cuentas activas.\"}
 En su SLEP actualmente un **",
         porcentaje,
         "%** de sus establecimientos no poseen ninguna cuenta activa (Director/Encargado SAE).
@@ -310,9 +314,6 @@ A continuación se presenta la lista de establecimientos que no tienen cuenta ac
 #| message: false
 #| warning: false
 #| results: "asis"
-
-listado_cuentas_table <- params$listado_cuentas
-listado_cuentas_table <- as.data.frame(listado_cuentas_table)
 
 if (nrow(listado_cuentas_table) == 0) {
     cat(
@@ -376,7 +377,7 @@ Actualmente, todos los establecimientos del SLEP cuentan con al menos un usuario
 En su SLEP actualmente hay un total de **`r params$n_ee_atrasados` establecimientos atrasados**, los que representan un total de **`r params$vas` vacantes sin asignar**.
 :::
 
-En la siguiente Figura se aprecia la distribución de los **36 SLEP** en régimen al 2026, donde el círculo de color diferente es la ubicación de su SLEP según la **tasa de cumplimiento** (eje horizontal) y las vacantes sin asignar (VSA, eje vertical). Aquellos SLEP que cuentan con una mayor tasa de cumplimiento y menor cantidad de vacantes sin asignar, muestran una gestión ágil del AEL.
+En la siguiente Figura se aprecia la distribución de los **`r params$n_total_sleps` SLEP** en régimen al `r params$year_actual`, donde el círculo de color diferente es la ubicación de su SLEP según la **tasa de cumplimiento** (eje horizontal) y las vacantes sin asignar (VSA, eje vertical). Aquellos SLEP que cuentan con una mayor tasa de cumplimiento y menor cantidad de vacantes sin asignar, muestran una gestión ágil del AEL.
 
 ```{r fig_scatter}
 #| echo: false
@@ -384,19 +385,17 @@ En la siguiente Figura se aprecia la distribución de los **36 SLEP** en régime
 #| warning: false
 #| fig-align: center
 
-datos_fig_1 <- params$data_fig_1
-datos_fig_1 <- as.data.frame(datos_fig_1)
-max_fig_1 <- ceiling(max(datos_fig_1$Vacantes.sin.asignar) / 50) * 50
+max_fig_1 <- ceiling(max(datos_fig_1$`Vacantes sin asignar`) / 50) * 50
 
 datos_fig_1 %>%
     mutate(
         nombre_slep = if_else(nombre_slep == params$slep, nombre_slep, ""),
         es_slep = if_else(nombre_slep == params$slep, "destacado", "otro")
     ) %>%
-  arrange(es_slep) %>% 
+  arrange(es_slep) %>%
     ggplot(aes(
-        x = Tasa.de.cumplimiento,
-        y = Vacantes.sin.asignar,
+        x = `Tasa de cumplimiento`,
+        y = `Vacantes sin asignar`,
         color = es_slep,
         fill = es_slep
     )) +
@@ -610,10 +609,7 @@ En esta sección se presenta el estado **actual** de las vacantes sin asignar po
 #| message: false
 #| warning: false
 
-temp_3 <- params$graf_lineas
-temp_3 <- as.data.frame(temp_3)
-
-temp_3 <- temp_3 %>%
+temp_3 <- graf_lineas %>%
     mutate(
         fecha_corte_info = as.Date(fecha_corte_info, format = "%d-%m-%Y")
     ) %>%
@@ -657,7 +653,7 @@ temp_3_totales %>%
     row_spec(0, bold = TRUE, color = "#0F4761", background = "#0F69B4") %>%
     row_spec(n_filas, bold = TRUE, color = "#0F4761") %>%
     add_footnote(
-        "Fuente: Visor Anótate en la lista, 2026.",
+        paste0("Fuente: Visor Anótate en la lista, ", year_actual, "."),
         notation = "symbol",
         escape = FALSE
     )
@@ -671,8 +667,7 @@ temp_3_totales %>%
 #| message: false
 #| warning: false
 
-listado_ael_rbd <- params$ael_actual
-listado_ael_rbd <- as.data.frame(listado_ael_rbd)
+listado_ael_rbd <- ael_actual
 
 if (nrow(listado_ael_rbd) == 0) {
     knitr::asis_output(paste0(
