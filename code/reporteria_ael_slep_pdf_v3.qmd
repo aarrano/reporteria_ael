@@ -38,6 +38,15 @@ params:
   ael_actual: null
   year_actual: null
   n_total_sleps: null
+  n_estudiantes_sobre: null
+  n_rbd_sobre: null
+  n_niveles_sobre: null
+  tasa_rbd_sobre: null
+  nivel_mas_afectado: null
+  n_sobre_nivel_top: null
+  ratio_sobre_lista_espera: null
+  listado_sobrematricula: null
+  top_rbd_sobre: null
 header-includes:
   - \renewcommand{\contentsname}{Tabla de contenidos}
   - \renewcommand{\tablename}{Tabla}
@@ -275,6 +284,23 @@ halign title=center]
 ]
 {\color{colorRojo}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_ee_sin_cuenta`}
 
+\tcbitem[
+  raster multicolumn=2,
+  colback=colorAlerta2!15!white,
+  colframe=colorAlerta2!15!white,
+  attach boxed title to top center={yshift=-2mm},
+  boxed title style={colback=colorAlerta2, arc=3mm, boxrule=0pt},
+  title={\color{white}Sobrematrícula}
+]
+\begin{minipage}[c]{0.48\linewidth}\centering
+{\small\sffamily Estudiantes sobrematriculados}\\[1mm]
+{\color{colorAlerta2}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_estudiantes_sobre`}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.48\linewidth}\centering
+{\small\sffamily EE con sobrematrícula}\\[1mm]
+{\color{colorAlerta2}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_rbd_sobre`}
+\end{minipage}
 
 \end{tcbitemize}
 
@@ -718,6 +744,109 @@ Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pen
         row_spec(0, bold = TRUE, color = "#0F4761", background = "#0F69B4") %>%
         add_footnote(
             "La información actualizada se encuentra en el visor compartido",
+            notation = "symbol",
+            escape = FALSE
+        )
+}
+```
+
+# Sobrematrícula
+
+Un nivel educativo se considera **sobrematriculado** cuando la matrícula actual supera la capacidad declarada por el establecimiento — es decir, cuando `vacantes_para_analisis` es negativo. Esta condición señala problemas estructurales en la distribución de cupos del territorio y constituye un foco prioritario para la fiscalización del SLEP, especialmente cuando coexiste con listas de espera activas en otros establecimientos del mismo SLEP.
+
+```{r sobrematricula_resumen}
+#| echo: false
+#| message: false
+#| warning: false
+#| results: "asis"
+
+n_est_sobre  <- params$n_estudiantes_sobre
+n_rbd_sobre  <- params$n_rbd_sobre
+n_niv_sobre  <- params$n_niveles_sobre
+tasa_rbd     <- params$tasa_rbd_sobre
+nivel_top    <- params$nivel_mas_afectado
+n_niv_top    <- params$n_sobre_nivel_top
+ratio_le     <- params$ratio_sobre_lista_espera
+
+if (is.null(n_est_sobre) || n_est_sobre == 0) {
+    cat(
+        "
+::: {.callout-tip title=\"✅ Sin sobrematrícula detectada\"}
+En este SLEP no se registran niveles con matrícula por sobre la capacidad declarada en el corte actual.
+:::
+"
+    )
+} else {
+    cat(paste0(
+        "En el corte actual se detectan **", n_niv_sobre,
+        " niveles educativos sobrematriculados** distribuidos en **", n_rbd_sobre,
+        " establecimientos** (", tasa_rbd, "% del total del SLEP). ",
+        "El nivel más afectado es **", nivel_top, "** con **", n_niv_top,
+        " estudiantes** por sobre la capacidad declarada.\n\n"
+    ))
+
+    if (!is.null(tasa_rbd) && !is.na(tasa_rbd) && tasa_rbd >= 25) {
+        cat(
+            "
+::: {.callout-important title=\"Problema sistémico\"}
+Más de un cuarto de los establecimientos del SLEP presentan sobrematrícula. Se recomienda revisar los procesos de proyección de matrícula y distribución de cupos a nivel territorial.
+:::
+"
+        )
+    }
+
+    if (!is.null(ratio_le) && !is.na(ratio_le) && ratio_le >= 0.5) {
+        cat(paste0(
+            "
+::: {.callout-important title=\"Coexistencia con lista de espera\"}
+La sobrematrícula equivale a un **", ratio_le,
+            "x** la cantidad de estudiantes en lista de espera del SLEP. Esto sugiere un problema de **distribución**: existen establecimientos sobrematriculados mientras otros tienen cupos disponibles solicitados por las familias.
+:::
+"
+        ))
+    }
+}
+```
+
+```{r sobrematricula_top_rbd}
+#| echo: false
+#| message: false
+#| warning: false
+
+top_rbd <- params$top_rbd_sobre
+if (!is.null(top_rbd) && nrow(as.data.frame(top_rbd)) > 0) {
+    top_rbd_tbl <- as.data.frame(top_rbd) %>%
+        select(comuna, rbd, nombre_ee, estudiantes_sobre, niveles_afectados)
+    colnames(top_rbd_tbl) <- c(
+        "Comuna",
+        "RBD",
+        "Establecimiento",
+        "Estudiantes sobrematriculados",
+        "Niveles afectados"
+    )
+
+    top_rbd_tbl %>%
+        kbl(
+            caption = "Top 5 establecimientos con mayor sobrematrícula.",
+            booktabs = TRUE,
+            longtable = FALSE,
+            linesep = "",
+            align = c("l", "c", "l", "c", "c")
+        ) %>%
+        kable_styling(
+            latex_options = c("striped", "HOLD_position"),
+            stripe_color = "#F0F4FA",
+            font_size = 9,
+            full_width = TRUE
+        ) %>%
+        column_spec(1, width = "3cm") %>%
+        column_spec(2, width = "1.2cm") %>%
+        column_spec(3, width = "5cm") %>%
+        column_spec(4, bold = TRUE, width = "2.5cm") %>%
+        column_spec(5, width = "2cm") %>%
+        row_spec(0, bold = TRUE, color = "#0F4761", background = "#0F69B4") %>%
+        add_footnote(
+            paste0("Fuente: Visor Anótate en la lista, ", params$year_actual, "."),
             notation = "symbol",
             escape = FALSE
         )
