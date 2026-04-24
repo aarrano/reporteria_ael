@@ -96,24 +96,28 @@ pacman::p_load(
     tidyverse,
     janitor,
     kableExtra,
-    ggrepel,
-    extrafont
+    ggrepel
 )
-loadfonts(device = "win", quiet = TRUE)
 
 ## Funciones:
 tema_cem <- function() {
   theme(
-    axis.text.y = element_text( size = 8, color = "black" ),# family = "Calibri Light"),
-    axis.text.x = element_text( size = 8, color = "black") ,# family = "Calibri Light"), 
-    axis.text = element_text(size=10, color = "black") , # family = "Calibri Light"),
-    #axis.title = element_blank(),
-    axis.line = element_line(color = "black", linewidth = 0.2),
-    #plot.background = element_rect(fill = NA, color = "black", size = 0.75),
-    panel.background = element_rect(fill = "white"),
-    panel.grid = element_blank(),
-    legend.text = element_text(size = 10, color = "black", family = "Calibri Light"), 
-    legend.title = element_text(size=10, color = "black", family = "Calibri Light")
+    axis.text.y     = element_text(size = 8,  color = "#333333"),
+    axis.text.x     = element_text(size = 8,  color = "#333333"),
+    axis.text       = element_text(size = 10, color = "#333333"),
+    axis.title      = element_text(size = 9,  color = "#555555"),
+    axis.line       = element_line(color = "#cccccc", linewidth = 0.3),
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid.major.y = element_line(color = "#eeeeee", linewidth = 0.3),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor   = element_blank(),
+    legend.text      = element_text(size = 9,  color = "#333333"),
+    legend.title     = element_text(size = 9,  color = "#333333", face = "bold"),
+    legend.key       = element_rect(fill = NA, color = NA),
+    plot.title       = element_text(size = 11, color = "#084682", face = "bold"),
+    plot.subtitle    = element_text(size = 9,  color = "#555555"),
+    strip.text       = element_text(size = 8,  color = "#333333", face = "bold"),
+    strip.background = element_rect(fill = "#f5f5f5", color = NA)
   )
 }
 ```
