@@ -45,7 +45,7 @@ params:
   nivel_mas_afectado: null
   n_sobre_nivel_top: null
   ratio_sobre_lista_espera: null
-  listado_sobrematricula: null
+  listado_sobrematrícula: null
   top_rbd_sobre: null
 header-includes:
   - \renewcommand{\contentsname}{Tabla de contenidos}
@@ -231,7 +231,7 @@ $$
 1.  En el **primer escenario**, las vacantes sin asignar corresponden al total de estudiantes en Listas de espera, que es menor a la cantidad de vacantes disponibles. En el Establecimiento aún quedarían 5 vacantes disponibles.
 
 2.  En el **segundo escenario**, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incorporar más estudiantes que la oferta disponible.
-
+\newpage
 # Estado del territorio
 
 \vspace{-5mm}
@@ -293,7 +293,7 @@ halign title=center]
   title={\color{white}Sobrematrícula}
 ]
 \begin{minipage}[c]{0.48\linewidth}\centering
-{\small\sffamily Estudiantes sobrematriculados}\\[1mm]
+{\small\sffamily Estudiantes sobrematrículados}\\[1mm]
 {\color{colorAlerta2}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_estudiantes_sobre`}
 \end{minipage}%
 \hfill
@@ -304,6 +304,7 @@ halign title=center]
 
 \end{tcbitemize}
 
+\newpage
 ## Establecimientos sin cuentas activas
 
 Para una correcta gestión del **Anótate en la lista** es necesario que todos los establecimientos del SLEP `r params$slep` cumplan con mantener la información de contacto de Directores/as y Encargadas/os SAE actualizada en **SIGE**.
@@ -752,9 +753,9 @@ Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pen
 
 # Sobrematrícula
 
-Un nivel educativo se considera **sobrematriculado** cuando la matrícula actual supera la capacidad declarada por el establecimiento — es decir, cuando `vacantes_para_analisis` es negativo. Esta condición señala problemas estructurales en la distribución de cupos del territorio y constituye un foco prioritario para la fiscalización del SLEP, especialmente cuando coexiste con listas de espera activas en otros establecimientos del mismo SLEP.
+Un nivel educativo se considera **sobrematrículado** cuando la matrícula actual supera la capacidad declarada por el establecimiento, es decir, cuando las vacantes disponibles son negativas. Esta condición señala problemas en la asignación de estudiantes através de las listas de espera, y debe constituye un foco prioritario para la fiscalización del SLEP, especialmente cuando no existe una justificación para dicha situación, como por ejemplo, un sobrecupo u otras situaciones particulares. Esta sección se añade como un modo de prevención ante fiscalizaciones de la Superintendencia de Educación.
 
-```{r sobrematricula_resumen}
+```{r sobrematrícula_resumen}
 #| echo: false
 #| message: false
 #| warning: false
@@ -772,14 +773,14 @@ if (is.null(n_est_sobre) || n_est_sobre == 0) {
     cat(
         "
 ::: {.callout-tip title=\"✅ Sin sobrematrícula detectada\"}
-En este SLEP no se registran niveles con matrícula por sobre la capacidad declarada en el corte actual.
+En este SLEP no se registran niveles con matrícula por sobre la capacidad declarada en el periodo actual.
 :::
 "
     )
 } else {
     cat(paste0(
-        "En el corte actual se detectan **", n_niv_sobre,
-        " niveles educativos sobrematriculados** distribuidos en **", n_rbd_sobre,
+        "En el periodo actual se detectan **", n_niv_sobre,
+        " niveles educativos con sobrematrícula** distribuidos en **", n_rbd_sobre,
         " establecimientos** (", tasa_rbd, "% del total del SLEP). ",
         "El nivel más afectado es **", nivel_top, "** con **", n_niv_top,
         " estudiantes** por sobre la capacidad declarada.\n\n"
@@ -788,27 +789,16 @@ En este SLEP no se registran niveles con matrícula por sobre la capacidad decla
     if (!is.null(tasa_rbd) && !is.na(tasa_rbd) && tasa_rbd >= 25) {
         cat(
             "
-::: {.callout-important title=\"Problema sistémico\"}
-Más de un cuarto de los establecimientos del SLEP presentan sobrematrícula. Se recomienda revisar los procesos de proyección de matrícula y distribución de cupos a nivel territorial.
+::: {.callout-important title=\"Problema Generalizado\"}
+Más de un cuarto de los establecimientos del SLEP presentan sobrematrícula. Se recomienda revisar los procesos de matrícula y gestión de lista de espera.
 :::
 "
         )
     }
-
-    if (!is.null(ratio_le) && !is.na(ratio_le) && ratio_le >= 0.5) {
-        cat(paste0(
-            "
-::: {.callout-important title=\"Coexistencia con lista de espera\"}
-La sobrematrícula equivale a un **", ratio_le,
-            "x** la cantidad de estudiantes en lista de espera del SLEP. Esto sugiere un problema de **distribución**: existen establecimientos sobrematriculados mientras otros tienen cupos disponibles solicitados por las familias.
-:::
-"
-        ))
-    }
 }
 ```
 
-```{r sobrematricula_top_rbd}
+```{r sobrematrícula_top_rbd}
 #| echo: false
 #| message: false
 #| warning: false
@@ -821,7 +811,7 @@ if (!is.null(top_rbd) && nrow(as.data.frame(top_rbd)) > 0) {
         "Comuna",
         "RBD",
         "Establecimiento",
-        "Estudiantes sobrematriculados",
+        "Estudiantes sobrematrículados",
         "Niveles afectados"
     )
 

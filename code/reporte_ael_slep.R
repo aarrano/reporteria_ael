@@ -181,7 +181,6 @@ listado_sobrematricula_slep <- df_ael %>%
     nombre_ee,
     nivel,
     matricula_actual,
-    cupos_declarados,
     sobrematricula = abs(vacantes_para_analisis)
   )
 
