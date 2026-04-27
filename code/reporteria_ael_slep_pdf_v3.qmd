@@ -45,7 +45,7 @@ params:
   nivel_mas_afectado: null
   n_sobre_nivel_top: null
   ratio_sobre_lista_espera: null
-  listado_sobrematrícula: null
+  listado_sobrematricula: null
   top_rbd_sobre: null
 header-includes:
   - \renewcommand{\contentsname}{Tabla de contenidos}
@@ -170,6 +170,7 @@ n_total_sleps <- params$n_total_sleps
 <!-- Dirección de Educación Pública. -->
 <!-- \end{center} -->
 
+\vspace{-3mm}
 # Sobre el proceso de Anótate en la Lista
 
 Este reporte entrega información del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de iniciar el proceso de matrícula 2027. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, la gestión de las vacantes disponibles permiten proteger las trayectorias educativas de los estudiantes.
@@ -231,7 +232,9 @@ $$
 1.  En el **primer escenario**, las vacantes sin asignar corresponden al total de estudiantes en Listas de espera, que es menor a la cantidad de vacantes disponibles. En el Establecimiento aún quedarían 5 vacantes disponibles.
 
 2.  En el **segundo escenario**, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incorporar más estudiantes que la oferta disponible.
+
 \newpage
+
 # Estado del territorio
 
 \vspace{-5mm}
@@ -753,9 +756,9 @@ Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pen
 
 # Sobrematrícula
 
-Un nivel educativo se considera **sobrematrículado** cuando la matrícula actual supera la capacidad declarada por el establecimiento, es decir, cuando las vacantes disponibles son negativas. Esta condición señala problemas en la asignación de estudiantes através de las listas de espera, y debe constituye un foco prioritario para la fiscalización del SLEP, especialmente cuando no existe una justificación para dicha situación, como por ejemplo, un sobrecupo u otras situaciones particulares. Esta sección se añade como un modo de prevención ante fiscalizaciones de la Superintendencia de Educación.
+Un nivel educativo se considera **sobrematrículado** cuando la matrícula actual supera la capacidad declarada por el establecimiento, es decir, cuando las vacantes disponibles son negativas. Esta condición señala problemas en la asignación de estudiantes a través de las listas de espera, y constituye un foco prioritario de monitoreo para el SLEP, especialmente cuando no existe una justificación para dicha situación, como por ejemplo, un sobrecupo u otras situaciones particulares. Esta sección se añade como un modo de prevención ante fiscalizaciones de la Superintendencia de Educación.
 
-```{r sobrematrícula_resumen}
+```{r sobrematricula_resumen}
 #| echo: false
 #| message: false
 #| warning: false
@@ -798,7 +801,7 @@ Más de un cuarto de los establecimientos del SLEP presentan sobrematrícula. Se
 }
 ```
 
-```{r sobrematrícula_top_rbd}
+```{r sobrematricula_top_rbd}
 #| echo: false
 #| message: false
 #| warning: false

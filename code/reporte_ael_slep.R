@@ -272,7 +272,7 @@ output_dir <- paste0("../Minuta x SLEP/", year_actual, "/", fecha_hoy, "/")
 i <- 1
 total <- length(nombre_sleps)
 sleps_fallidos <- character(0)
-for (s in nombre_sleps[11]) {
+for (s in nombre_sleps) {
   "Hacemos el print de qué SLEP se está generando"
   print(paste("Trabajando en el slep", s))
 
