@@ -38,6 +38,15 @@ params:
   ael_actual: null
   year_actual: null
   n_total_sleps: null
+  n_estudiantes_sobre: null
+  n_rbd_sobre: null
+  n_niveles_sobre: null
+  tasa_rbd_sobre: null
+  nivel_mas_afectado: null
+  n_sobre_nivel_top: null
+  ratio_sobre_lista_espera: null
+  listado_sobrematricula: null
+  top_rbd_sobre: null
 header-includes:
   - \renewcommand{\contentsname}{Tabla de contenidos}
   - \renewcommand{\tablename}{Tabla}
@@ -161,6 +170,7 @@ n_total_sleps <- params$n_total_sleps
 <!-- Dirección de Educación Pública. -->
 <!-- \end{center} -->
 
+\vspace{-3mm}
 # Sobre el proceso de Anótate en la Lista
 
 Este reporte entrega información del proceso de regularización de matrícula a través de la plataforma **Anótate en la lista (AEL)**. El **AEL** hoy representa la **única** forma de obtener una matrícula durante el año en curso, hasta antes de iniciar el proceso de matrícula 2027. Los estudiantes que participan de este proceso, lo hacen por diversos motivos, desde no tener un establecimiento a comienzos del año escolar, cambios de comuna de residencia, u otros motivos. Por lo anterior, la gestión de las vacantes disponibles permiten proteger las trayectorias educativas de los estudiantes.
@@ -223,6 +233,8 @@ $$
 
 2.  En el **segundo escenario**, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incorporar más estudiantes que la oferta disponible.
 
+\newpage
+
 # Estado del territorio
 
 \vspace{-5mm}
@@ -275,9 +287,27 @@ halign title=center]
 ]
 {\color{colorRojo}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_ee_sin_cuenta`}
 
+\tcbitem[
+  raster multicolumn=2,
+  colback=colorAlerta2!15!white,
+  colframe=colorAlerta2!15!white,
+  attach boxed title to top center={yshift=-2mm},
+  boxed title style={colback=colorAlerta2, arc=3mm, boxrule=0pt},
+  title={\color{white}Sobrematrícula}
+]
+\begin{minipage}[c]{0.48\linewidth}\centering
+{\small\sffamily Estudiantes sobrematrículados}\\[1mm]
+{\color{colorAlerta2}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_estudiantes_sobre`}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.48\linewidth}\centering
+{\small\sffamily EE con sobrematrícula}\\[1mm]
+{\color{colorAlerta2}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_rbd_sobre`}
+\end{minipage}
 
 \end{tcbitemize}
 
+\newpage
 ## Establecimientos sin cuentas activas
 
 Para una correcta gestión del **Anótate en la lista** es necesario que todos los establecimientos del SLEP `r params$slep` cumplan con mantener la información de contacto de Directores/as y Encargadas/os SAE actualizada en **SIGE**.
@@ -718,6 +748,98 @@ Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pen
         row_spec(0, bold = TRUE, color = "#0F4761", background = "#0F69B4") %>%
         add_footnote(
             "La información actualizada se encuentra en el visor compartido",
+            notation = "symbol",
+            escape = FALSE
+        )
+}
+```
+
+# Sobrematrícula
+
+Un nivel educativo se considera **sobrematrículado** cuando la matrícula actual supera la capacidad declarada por el establecimiento, es decir, cuando las vacantes disponibles son negativas. Esta condición señala problemas en la asignación de estudiantes a través de las listas de espera, y constituye un foco prioritario de monitoreo para el SLEP, especialmente cuando no existe una justificación para dicha situación, como por ejemplo, un sobrecupo u otras situaciones particulares. Esta sección se añade como un modo de prevención ante fiscalizaciones de la Superintendencia de Educación.
+
+```{r sobrematricula_resumen}
+#| echo: false
+#| message: false
+#| warning: false
+#| results: "asis"
+
+n_est_sobre  <- params$n_estudiantes_sobre
+n_rbd_sobre  <- params$n_rbd_sobre
+n_niv_sobre  <- params$n_niveles_sobre
+tasa_rbd     <- params$tasa_rbd_sobre
+nivel_top    <- params$nivel_mas_afectado
+n_niv_top    <- params$n_sobre_nivel_top
+ratio_le     <- params$ratio_sobre_lista_espera
+
+if (is.null(n_est_sobre) || n_est_sobre == 0) {
+    cat(
+        "
+::: {.callout-tip title=\"✅ Sin sobrematrícula detectada\"}
+En este SLEP no se registran niveles con matrícula por sobre la capacidad declarada en el periodo actual.
+:::
+"
+    )
+} else {
+    cat(paste0(
+        "En el periodo actual se detectan **", n_niv_sobre,
+        " niveles educativos con sobrematrícula** distribuidos en **", n_rbd_sobre,
+        " establecimientos** (", tasa_rbd, "% del total del SLEP). ",
+        "El nivel más afectado es **", nivel_top, "** con **", n_niv_top,
+        " estudiantes** por sobre la capacidad declarada.\n\n"
+    ))
+
+    if (!is.null(tasa_rbd) && !is.na(tasa_rbd) && tasa_rbd >= 25) {
+        cat(
+            "
+::: {.callout-important title=\"Problema Generalizado\"}
+Más de un cuarto de los establecimientos del SLEP presentan sobrematrícula. Se recomienda revisar los procesos de matrícula y gestión de lista de espera.
+:::
+"
+        )
+    }
+}
+```
+
+```{r sobrematricula_top_rbd}
+#| echo: false
+#| message: false
+#| warning: false
+
+top_rbd <- params$top_rbd_sobre
+if (!is.null(top_rbd) && nrow(as.data.frame(top_rbd)) > 0) {
+    top_rbd_tbl <- as.data.frame(top_rbd) %>%
+        select(comuna, rbd, nombre_ee, estudiantes_sobre, niveles_afectados)
+    colnames(top_rbd_tbl) <- c(
+        "Comuna",
+        "RBD",
+        "Establecimiento",
+        "Estudiantes sobrematrículados",
+        "Niveles afectados"
+    )
+
+    top_rbd_tbl %>%
+        kbl(
+            caption = "Top 5 establecimientos con mayor sobrematrícula.",
+            booktabs = TRUE,
+            longtable = FALSE,
+            linesep = "",
+            align = c("l", "c", "l", "c", "c")
+        ) %>%
+        kable_styling(
+            latex_options = c("striped", "HOLD_position"),
+            stripe_color = "#F0F4FA",
+            font_size = 9,
+            full_width = TRUE
+        ) %>%
+        column_spec(1, width = "3cm") %>%
+        column_spec(2, width = "1.2cm") %>%
+        column_spec(3, width = "5cm") %>%
+        column_spec(4, bold = TRUE, width = "2.5cm") %>%
+        column_spec(5, width = "2cm") %>%
+        row_spec(0, bold = TRUE, color = "#0F4761", background = "#0F69B4") %>%
+        add_footnote(
+            paste0("Fuente: Visor Anótate en la lista, ", params$year_actual, "."),
             notation = "symbol",
             escape = FALSE
         )

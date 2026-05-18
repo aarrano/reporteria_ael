@@ -133,6 +133,58 @@ indicadores_1 <- df_ael %>%
 indicadores_1[is.na(indicadores_1)] <- 0
 
 
+### 1.1 - Indicadores de sobrematrícula por SLEP ----
+"Sobrematrícula: nivel cuya matrícula actual supera la capacidad declarada (vacantes_para_analisis < 0)."
+
+sobrematricula_slep <- df_ael %>%
+  filter(fecha_corte_info == fecha_ultima_actualización) %>%
+  summarize(
+    n_estudiantes_sobre = sum(
+      abs(vacantes_para_analisis[vacantes_para_analisis < 0]),
+      na.rm = TRUE
+    ),
+    n_rbd_sobre = n_distinct(rbd[vacantes_para_analisis < 0]),
+    n_niveles_sobre = sum(vacantes_para_analisis < 0, na.rm = TRUE),
+    lista_espera_total = sum(lista_de_espera_anotate, na.rm = TRUE),
+    .by = nombre_slep
+  ) %>%
+  mutate(
+    ratio_sobre_lista_espera = if_else(
+      lista_espera_total > 0,
+      round(n_estudiantes_sobre / lista_espera_total, 2),
+      NA_real_
+    )
+  )
+
+"Nivel educativo más afectado por SLEP (mayor sobrematrícula absoluta)."
+nivel_mas_afectado_slep <- df_ael %>%
+  filter(fecha_corte_info == fecha_ultima_actualización) %>%
+  filter(vacantes_para_analisis < 0) %>%
+  summarize(
+    n_sobre_nivel = sum(abs(vacantes_para_analisis), na.rm = TRUE),
+    .by = c(nombre_slep, nivel)
+  ) %>%
+  slice_max(n_sobre_nivel, by = nombre_slep, n = 1, with_ties = FALSE) %>%
+  rename(
+    nivel_top = nivel,
+    n_sobre_nivel_top = n_sobre_nivel
+  )
+
+"Detalle: una fila por RBD × nivel sobrematriculado."
+listado_sobrematricula_slep <- df_ael %>%
+  filter(fecha_corte_info == fecha_ultima_actualización) %>%
+  filter(vacantes_para_analisis < 0) %>%
+  transmute(
+    nombre_slep,
+    comuna,
+    rbd,
+    nombre_ee,
+    nivel,
+    matricula_actual,
+    sobrematricula = abs(vacantes_para_analisis)
+  )
+
+
 ### 2 - Listado de EE sin cuenta activa ----
 "Generamos la base de cuentas inactivas por SLEP, además añadiremos la cantidad de lista de espera de cada RBD"
 
@@ -257,6 +309,39 @@ for (s in nombre_sleps) {
     filter(nombre_slep == s) %>%
     select(-nombre_slep)
 
+  ## Pasamos los indicadores de sobrematrícula ----
+  sobre_slep <- sobrematricula_slep %>% filter(nombre_slep == s)
+  n_estudiantes_sobre <- sobre_slep %>% pull(n_estudiantes_sobre)
+  n_rbd_sobre <- sobre_slep %>% pull(n_rbd_sobre)
+  n_niveles_sobre <- sobre_slep %>% pull(n_niveles_sobre)
+  ratio_sobre_lista_espera <- sobre_slep %>% pull(ratio_sobre_lista_espera)
+  tasa_rbd_sobre <- if (n_ee > 0) round(n_rbd_sobre * 100 / n_ee, 1) else 0
+
+  nivel_top_slep <- nivel_mas_afectado_slep %>% filter(nombre_slep == s)
+  if (nrow(nivel_top_slep) == 0) {
+    nivel_mas_afectado <- "—"
+    n_sobre_nivel_top <- 0
+  } else {
+    nivel_mas_afectado <- nivel_top_slep %>% pull(nivel_top)
+    n_sobre_nivel_top <- nivel_top_slep %>% pull(n_sobre_nivel_top)
+  }
+
+  listado_sobrematricula_slep_qmd <- listado_sobrematricula_slep %>%
+    filter(nombre_slep == s) %>%
+    select(-nombre_slep) %>%
+    arrange(desc(sobrematricula))
+
+  top_rbd_sobre_qmd <- listado_sobrematricula_slep_qmd %>%
+    summarize(
+      comuna = first(comuna),
+      nombre_ee = first(nombre_ee),
+      estudiantes_sobre = sum(sobrematricula),
+      niveles_afectados = n(),
+      .by = rbd
+    ) %>%
+    arrange(desc(estudiantes_sobre)) %>%
+    slice_head(n = 5)
+
   ## Quarto render ----
   tryCatch({
     quarto::quarto_render(
@@ -278,7 +363,16 @@ for (s in nombre_sleps) {
         glosario = tabla_glosario,
         ael_actual = ael_actual,
         year_actual = year_actual,
-        n_total_sleps = total
+        n_total_sleps = total,
+        n_estudiantes_sobre = n_estudiantes_sobre,
+        n_rbd_sobre = n_rbd_sobre,
+        n_niveles_sobre = n_niveles_sobre,
+        tasa_rbd_sobre = tasa_rbd_sobre,
+        nivel_mas_afectado = nivel_mas_afectado,
+        n_sobre_nivel_top = n_sobre_nivel_top,
+        ratio_sobre_lista_espera = ratio_sobre_lista_espera,
+        listado_sobrematricula = listado_sobrematricula_slep_qmd,
+        top_rbd_sobre = top_rbd_sobre_qmd
       ),
       quiet = FALSE,
       quarto_args = c("--output-dir", output_dir)
