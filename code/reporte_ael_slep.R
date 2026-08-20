@@ -28,6 +28,9 @@ pacman::p_load(
 year_actual <- year(today())
 year_esperado <- 2026L
 
+# Config comparación KPI: se compara la última medición contra la anterior (P5)
+N_MEDICIONES_COMPARA <- 2L
+
 loadfonts(device = "win", quiet = TRUE)
 ## Creacion carpetas
 fecha_hoy <- format(Sys.Date(), "%y%m%d")  # "260316"
@@ -53,6 +56,18 @@ message(paste(
 
 #Acceso al estado de cuentas
 link_cuentas <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/data/cuentas/cuentas_activas.xlsx"
+
+#Acceso al detalle por especialidad (3° y 4° medio TP) para la 2da hoja del Excel por SLEP
+link_detalle <- "D:/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista - traspaso/data/raw_detalle"
+HOJA_DETALLE_NOMBRE <- "vacantes_detalle" # nombre de la hoja de origen en el xlsx
+# Columnas esenciales a exportar en la 2da hoja (nombres originales del archivo) (P5)
+COLS_DETALLE <- c(
+  "Comuna", "RBD", "Nombre EE", "Nivel", "Código Enseñanza", "Jornada",
+  "Especialidad", "Cupos Declarados", "Matrícula actual",
+  "Vacantes referenciales", "Vacantes asignadas por AEL",
+  "Vacantes para análisis", "Lista de espera anótate",
+  "Fecha último cupo entregado"
+)
 
 #Cargamos tabla con definiciones para el glosario
 tabla_glosario <- read.xlsx("./inputs_qmd/tabla_glosario.xlsx")
@@ -89,7 +104,7 @@ message(
 )
 
 ### 1 - Indicadores Tier 1 ----
-"Esta sección incluye los 5 indicadores mas utilizados: Total de EE, EE atrasados, % de cumplimiento, Prom. dias sin movimiento, EE sin cuentas activas"
+"Esta sección incluye los 5 indicadores mas utilizados: Total de EE, EE atrasados, % de cumplimiento, Vacantes sin asignar, EE sin cuentas activas"
 
 fecha_ultima_actualización <- max(df_ael$fecha_corte_info)
 print(paste("Los últimos datos corresponden al", fecha_ultima_actualización))
@@ -102,12 +117,6 @@ indicadores_1 <- df_ael %>%
     `EE atrasados` = n_distinct(rbd[condicion_rbd == 1]),
     `Tasa de cumplimiento` = round(
       (`Total de EE` - `EE atrasados`) * 100 / `Total de EE`,
-      1
-    ),
-    `Promedio dias atrasados` = round(
-      mean(`promedio dias sin movimiento`[
-        condicion_rbd == 1 & posibles_cupos > 0
-      ]),
       1
     ),
     `Vacantes sin asignar` = sum(posibles_cupos, na.rm = TRUE),
@@ -131,6 +140,45 @@ indicadores_1 <- df_ael %>%
 
 # Reemplazamos con 0 los SLEP que no tienen cuentas atrasadas
 indicadores_1[is.na(indicadores_1)] <- 0
+
+
+### 1b - Indicadores del periodo anterior (variación de tarjetas KPI) ----
+"Para mostrar la variación respecto a la medición anterior necesitamos los mismos
+indicadores calculados en la penúltima fecha de corte. Solo se comparan los KPI
+que tienen historial en el maestro: EE atrasados y Vacantes sin asignar (VSA)."
+
+fechas_comp <- df_ael %>%
+  distinct(fecha_corte_info) %>%
+  arrange(desc(fecha_corte_info)) %>%
+  slice_head(n = N_MEDICIONES_COMPARA) %>%
+  pull(fecha_corte_info)
+
+fecha_anterior <- if (length(fechas_comp) >= 2) fechas_comp[2] else NA
+
+if (is.na(fecha_anterior)) {
+  warning(
+    "Solo hay una medición disponible en el maestro: las tarjetas KPI se mostrarán 'sin comparación'."
+  )
+} else {
+  message(paste("Comparando", fecha_ultima_actualización, "vs", fecha_anterior))
+}
+
+# Mismas definiciones que indicadores_1, pero para la fecha anterior
+indicadores_prev <- if (!is.na(fecha_anterior)) {
+  df_ael %>%
+    filter(fecha_corte_info == fecha_anterior) %>%
+    summarize(
+      ee_atrasados_prev = n_distinct(rbd[condicion_rbd == 1]),
+      vas_prev = sum(posibles_cupos, na.rm = TRUE),
+      .by = nombre_slep
+    )
+} else {
+  tibble(
+    nombre_slep = character(),
+    ee_atrasados_prev = integer(),
+    vas_prev = integer()
+  )
+}
 
 
 ### 1.1 - Indicadores de sobrematrícula por SLEP ----
@@ -258,10 +306,52 @@ temp_ael <- ael_t %>%
     nombre_ee,
     `total posibles cupos`,
     `total niveles atrasados`,
-    `total niveles ofrecidos`,
-    `promedio dias sin movimiento`
+    `total niveles ofrecidos`
   ) %>%
   rename(`Vacantes sin asignar` = `total posibles cupos`)
+
+
+### 5 - Detalle por especialidad para la 2da hoja del Excel por SLEP ----
+"Leemos el archivo de detalle más reciente de raw_detalle, filtramos a 3° y 4°
+medio (único nivel con desglose por especialidad TP) y seleccionamos las columnas
+esenciales. Se lee UNA sola vez fuera del loop por eficiencia (P6)."
+
+leer_detalle_media <- function(carpeta_detalle, hoja, columnas) {
+  archivos <- list.files(carpeta_detalle, pattern = "\\.xlsx$", full.names = TRUE)
+  if (length(archivos) == 0) {
+    stop("No se encontró ningún .xlsx en: ", carpeta_detalle)
+  }
+  # El naming es inconsistente entre archivos -> elegimos el más reciente por fecha de modificación
+  archivo <- archivos[which.max(file.mtime(archivos))]
+  message("Leyendo detalle por especialidad: ", basename(archivo))
+
+  # sep.names = " " evita que openxlsx reemplace los espacios de los encabezados por "."
+  detalle <- read.xlsx(archivo, sheet = hoja, sep.names = " ")
+
+  # Validación de columnas esperadas (fail-fast, P9/P10)
+  faltantes <- setdiff(columnas, names(detalle))
+  if (length(faltantes) > 0) {
+    stop(
+      "Faltan columnas esperadas en el detalle: ",
+      paste(faltantes, collapse = ", "),
+      "\nColumnas disponibles: ", paste(names(detalle), collapse = " | ")
+    )
+  }
+
+  # Solo 3° y 4° medio (regex tolerante al carácter de grado y a espacios)
+  detalle_media <- detalle %>%
+    filter(grepl("^[34].*Medio", Nivel)) %>%
+    select(all_of(columnas))
+
+  if (nrow(detalle_media) == 0) {
+    warning(
+      "El detalle no contiene filas de 3°/4° medio tras el filtro. Revisar los valores de 'Nivel'."
+    )
+  }
+  detalle_media
+}
+
+detalle_media <- leer_detalle_media(link_detalle, HOJA_DETALLE_NOMBRE, COLS_DETALLE)
 
   
 
@@ -278,7 +368,25 @@ for (s in nombre_sleps) {
 
   data_slep <- ael_t %>% filter(nombre_slep == s)
   nom_excel <- gsub(" ", "_", s)
-  write.xlsx(data_slep, paste0(carpeta, "AEL_", nom_excel, ".xlsx"), asTable = TRUE, overwrite = TRUE)
+
+  # Hoja 2: detalle 3°/4° medio TP de los RBD del SLEP (cruce por RBD como texto, P7)
+  rbds_slep <- unique(as.character(data_slep$rbd))
+  detalle_slep <- detalle_media %>%
+    filter(as.character(RBD) %in% rbds_slep)
+
+  if (nrow(detalle_slep) == 0) {
+    message("  ⚠️  ", s, ": sin filas de detalle 3°/4° medio; la hoja 2 quedará solo con encabezados.")
+  }
+
+  write.xlsx(
+    list(
+      "AEL" = data_slep,
+      "Detalle 3-4 medio TP" = detalle_slep
+    ),
+    paste0(carpeta, "AEL_", nom_excel, ".xlsx"),
+    asTable = TRUE,
+    overwrite = TRUE
+  )
 
   ## Pasamos los indicadores claves del SLEP ----
   indicadores_slep <- indicadores_1 %>% filter(nombre_slep == s)
@@ -286,8 +394,13 @@ for (s in nombre_sleps) {
   n_ee_atrasados <- indicadores_slep %>% pull(`EE atrasados`)
   n_ee_sin_cuenta <- indicadores_slep %>% pull(`EE sin cuentas`)
   tasa_cumplimiento <- indicadores_slep %>% pull(`Tasa de cumplimiento`)
-  dias_sin_mov <- indicadores_slep %>% pull(`Promedio dias atrasados`)
   vas <- indicadores_slep %>% pull(`Vacantes sin asignar`)
+
+  ## Valores del periodo anterior para variación de KPI ----
+  prev_slep <- indicadores_prev %>% filter(nombre_slep == s)
+  n_ee_atrasados_prev <- if (nrow(prev_slep) == 1) prev_slep$ee_atrasados_prev else NA_integer_
+  vas_prev <- if (nrow(prev_slep) == 1) prev_slep$vas_prev else NA_integer_
+
   nombre <- s
 
   ## Pasamos la lista de correos sin AEL ----
@@ -353,13 +466,14 @@ for (s in nombre_sleps) {
         slep = nombre,
         n_ee = n_ee,
         n_ee_atrasados = n_ee_atrasados,
+        n_ee_atrasados_prev = n_ee_atrasados_prev,
         n_ee_sin_cuenta = n_ee_sin_cuenta,
         tasa_cumplimiento = tasa_cumplimiento,
-        dias_sin_mov = dias_sin_mov,
         listado_cuentas = df_cuentas_slep_qmd,
         data_fig_1 = indicadores_1,
         graf_lineas = temp_2,
         vas = vas,
+        vas_prev = vas_prev,
         glosario = tabla_glosario,
         ael_actual = ael_actual,
         year_actual = year_actual,

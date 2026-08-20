@@ -28,11 +28,12 @@ params:
   glosario: null
   n_ee: null
   n_ee_atrasados: null
+  n_ee_atrasados_prev: null
   n_ee_sin_cuenta: null
   tasa_cumplimiento: null
-  dias_sin_mov: null
   listado_cuentas: null
   vas: null
+  vas_prev: null
   data_fig_1: null
   graf_lineas: null
   ael_actual: null
@@ -129,6 +130,38 @@ tema_cem <- function() {
     strip.background = element_rect(fill = "#f5f5f5", color = NA)
   )
 }
+
+# Formatea la variación de un KPI como snippet LaTeX (flecha + magnitud + %).
+# menor_es_mejor = TRUE -> una baja es "buena" (verde) y un alza "mala" (rojo).
+# Casos borde: sin medición anterior o NA -> "sin comparación"; denominador 0 -> sin %.
+delta_latex <- function(actual, anterior, menor_es_mejor = TRUE) {
+  # Coerción defensiva: los params pueden llegar como NULL/NA/string desde el YAML
+  actual   <- suppressWarnings(as.numeric(actual))
+  anterior <- suppressWarnings(as.numeric(anterior))
+  if (length(anterior) != 1 || is.na(anterior) ||
+      length(actual) != 1 || is.na(actual)) {
+    return("{\\footnotesize\\itshape\\color{gray}sin comparación}")
+  }
+  delta <- actual - anterior
+  if (delta == 0) {
+    return("{\\footnotesize\\color{gray}$\\rightarrow$~sin cambios}")
+  }
+  flecha <- if (delta > 0) "\\uparrow" else "\\downarrow"
+  bueno  <- if (menor_es_mejor) delta < 0 else delta > 0
+  color  <- if (bueno) "green!55!black" else "colorRojo"
+  pct    <- if (anterior != 0) {
+    sprintf("~(%.1f\\%%)", abs(delta) * 100 / anterior)
+  } else {
+    ""
+  }
+  sprintf(
+    "{\\footnotesize\\bfseries\\color{%s}$%s$~%s%s}",
+    color,
+    flecha,
+    format(abs(delta), big.mark = "."),
+    pct
+  )
+}
 ```
 
 ```{r config_tablas}
@@ -187,51 +220,51 @@ La información disponible en este documento se basa únicamente en los establec
 :::
 
 \newpage
-# Metodología
-\vspace{-3mm}
-## Glosario de indicadores
-\vspace{-5mm}
-```{r tabla_glosario}
-#| echo: false
-#| message: false
-#| warning: false
-#| results: "asis"
+<!-- # Metodología -->
+<!-- \vspace{-3mm} -->
+<!-- ## Glosario de indicadores -->
+<!-- \vspace{-5mm} -->
+<!-- ```{r tabla_glosario} -->
+<!-- #| echo: false -->
+<!-- #| message: false -->
+<!-- #| warning: false -->
+<!-- #| results: "asis" -->
 
-tbl_glosario <- glosario %>%
-    kbl(
-        booktabs = TRUE,
-        longtable = FALSE,
-        linesep = "\\addlinespace"
-    ) %>%
-    kable_styling(
-        latex_options = c("HOLD_position"),
-        font_size = 10,
-        full_width = TRUE
-    ) %>%
-    column_spec(1, bold = TRUE, color = "#0F4761", width = "4cm") %>%
-    column_spec(2, width = "11cm") %>%
-    row_spec(0, bold = TRUE, color = "#0F4761", background = "white")
+<!-- tbl_glosario <- glosario %>% -->
+<!--     kbl( -->
+<!--         booktabs = TRUE, -->
+<!--         longtable = FALSE, -->
+<!--         linesep = "\\addlinespace" -->
+<!--     ) %>% -->
+<!--     kable_styling( -->
+<!--         latex_options = c("HOLD_position"), -->
+<!--         font_size = 10, -->
+<!--         full_width = TRUE -->
+<!--     ) %>% -->
+<!--     column_spec(1, bold = TRUE, color = "#0F4761", width = "4cm") %>% -->
+<!--     column_spec(2, width = "11cm") %>% -->
+<!--     row_spec(0, bold = TRUE, color = "#0F4761", background = "white") -->
 
-cat(knitr::knit_print(tbl_glosario))
-```
-\vspace{-3mm}
-## Cálculo de vacantes sin asignar
-\vspace{-3mm}
-Las vacantes sin asignar corresponden al indicador utilizado por la DEP para monitorear la cantidad de estudiantes que pueden matricularse en un establecimiento. A continuación se presenta el cálculo de las **Vacantes Sin Asignar** (VSA) y un ejemplo concreto.
-$$
-\text{Vacantes sin Asignar (VSA)} = \text{mínimo}\{\text{Vacantes disponibles, Lista de espera}\}
-$$
-En el siguiente ejemplo, se presentan dos escenarios que dan cuenta del cálculo de las VSA disponibles.
-$$
-\text{Vacantes sin asignar (VSA)} =\begin{cases}
-    \text{10 Vacantes y 5 estudiantes en Lista de espera} & \longrightarrow \text{5 VSA} \\
-    \text{10 Vacantes y 20 estudiantes en Lista de espera} & \longrightarrow \text{10 VSA}
-  \end{cases}
-$$
+<!-- cat(knitr::knit_print(tbl_glosario)) -->
+<!-- ``` -->
+<!-- \vspace{-3mm} -->
+<!-- ## Cálculo de vacantes sin asignar -->
+<!-- \vspace{-3mm} -->
+<!-- Las vacantes sin asignar corresponden al indicador utilizado por la DEP para monitorear la cantidad de estudiantes que pueden matricularse en un establecimiento. A continuación se presenta el cálculo de las **Vacantes Sin Asignar** (VSA) y un ejemplo concreto. -->
+<!-- $$ -->
+<!-- \text{Vacantes sin Asignar (VSA)} = \text{mínimo}\{\text{Vacantes disponibles, Lista de espera}\} -->
+<!-- $$ -->
+<!-- En el siguiente ejemplo, se presentan dos escenarios que dan cuenta del cálculo de las VSA disponibles. -->
+<!-- $$ -->
+<!-- \text{Vacantes sin asignar (VSA)} =\begin{cases} -->
+<!--     \text{10 Vacantes y 5 estudiantes en Lista de espera} & \longrightarrow \text{5 VSA} \\ -->
+<!--     \text{10 Vacantes y 20 estudiantes en Lista de espera} & \longrightarrow \text{10 VSA} -->
+<!--   \end{cases} -->
+<!-- $$ -->
 
-1.  En el **primer escenario**, las vacantes sin asignar corresponden al total de estudiantes en Listas de espera, que es menor a la cantidad de vacantes disponibles. En el Establecimiento aún quedarían 5 vacantes disponibles.
+<!-- 1.  En el **primer escenario**, las vacantes sin asignar corresponden al total de estudiantes en Listas de espera, que es menor a la cantidad de vacantes disponibles. En el Establecimiento aún quedarían 5 vacantes disponibles. -->
 
-2.  En el **segundo escenario**, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incorporar más estudiantes que la oferta disponible.
+<!-- 2.  En el **segundo escenario**, las vacantes sin asignar corresponden al total de vacantes disponibles, dado que es menor que la lista de espera y no se pueden incorporar más estudiantes que la oferta disponible. -->
 
 \newpage
 
@@ -267,7 +300,8 @@ halign title=center]
   boxed title style={colback=colorAlerta, arc=3mm, boxrule=0pt},
   title={\color{colorDEP}Establecimientos atrasados}
 ]
-{\color{colorAlerta}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_ee_atrasados`}
+{\color{colorAlerta}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$n_ee_atrasados`}\\[1.5mm]
+`r delta_latex(params$n_ee_atrasados, params$n_ee_atrasados_prev, menor_es_mejor = TRUE)`
 
 \tcbitem[
   colback=red!6!white,
@@ -276,7 +310,8 @@ halign title=center]
   boxed title style={colback=colorRojo, arc=3mm, boxrule=0pt},
   title={\color{white}Vacantes sin asignar}
 ]
-{\color{colorRojo}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$vas`}
+{\color{colorRojo}\fontsize{28}{32}\selectfont\bfseries\sffamily `r params$vas`}\\[1.5mm]
+`r delta_latex(params$vas, params$vas_prev, menor_es_mejor = TRUE)`
 
 \tcbitem[
   colback=red!6!white,
@@ -719,8 +754,7 @@ Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pen
         "Establecimiento",
         "VSA",
         "Niv. Atrasados",
-        "Niv. Ofrecidos",
-        "Días sin mov."
+        "Niv. Ofrecidos"
     )
 
     listado_ael_rbd %>%
@@ -730,7 +764,7 @@ Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pen
             booktabs = TRUE,
             longtable = TRUE,
             linesep = "",
-            align = c("l", "c", "l", "c", "c", "c", "c")
+            align = c("l", "c", "l", "c", "c", "c")
         ) %>%
         kable_styling(
             latex_options = c("striped", "HOLD_position", "repeat_header"),
@@ -744,7 +778,6 @@ Actualmente, todos los establecimientos del SLEP han gestionado sus vacantes pen
         column_spec(4, bold = TRUE, width = "1.2cm") %>%
         column_spec(5, width = "1.5cm") %>%
         column_spec(6, width = "1.5cm") %>%
-        column_spec(7, width = "1.5cm") %>%
         row_spec(0, bold = TRUE, color = "#0F4761", background = "#0F69B4") %>%
         add_footnote(
             "La información actualizada se encuentra en el visor compartido",
