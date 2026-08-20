@@ -249,6 +249,16 @@ df_cuentas <- df_cuentas %>%
     by = "rbd"
   )
 
+"Las columnas numéricas del join (Lista de espera / Vacantes disponibles) pueden
+quedar con NA cuando un RBD no matchea. Se rellenan con 0 ANTES del reemplazo
+global, porque asignar '' sobre un NA coacciona toda la columna a character y
+rompe el arrange(-`Lista de espera`) del reporte."
+df_cuentas <- df_cuentas %>%
+  mutate(across(
+    c(`Lista de espera`, `Vacantes disponibles`),
+    ~ replace_na(as.numeric(.), 0)
+  ))
+
 "Algunas variables quedan con NA porque no hay correos asociados al RBD en SIGE."
 df_cuentas[is.na(df_cuentas)] <- ""
 
