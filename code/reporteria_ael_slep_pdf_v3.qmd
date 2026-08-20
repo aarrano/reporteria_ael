@@ -407,7 +407,7 @@ Actualmente, todos los establecimientos del SLEP cuentan con al menos un usuario
     )
 
     tbl <- listado_cuentas_table %>%
-    arrange(-`Lista de espera`) %>%
+    arrange(desc(as.numeric(`Lista de espera`))) %>%
     kbl(
         caption = "Listado de EE sin cuentas activas (Ni director Ni encargado SAE).",
         booktabs = TRUE,
