@@ -4,7 +4,8 @@
       "Read(//d/Alonso.Arrano/OneDrive - Dirección de Educación Pública/2024/SAE - Anotate en la lista/reporteria_ael/**)",
       "Bash(gh pr create --title 'Mejoras de mantenibilidad al proceso de reportería AEL' --body ' *)",
       "Bash(where gh *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(git add *)"
     ]
   }
 }
